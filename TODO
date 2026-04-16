@@ -1,0 +1,14 @@
+This project is under heavy and active development. We are working on
+both a "Code-aware editor" as well as the IDE functionality at the same
+time.
+
+Editor
+* Code folding
+* Automatic code indenting / formatting
+* notepad, emacs and vim and editing modes (key bindings)
+* LLVM parsing
+* Cross reference for c, c++ and some scripting language
+* Support for EditorConfig - http://editorconfig.org/
+
+IDE
+* Integrated console

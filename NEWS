@@ -1,0 +1,280 @@
+=======
+Edi 0.9
+=======
+
+ * Fix our themes to use new ELM color-classes.
+ * Improve the file selector behaviour.
+ * Improve tab moving.
+ * Improve the settings dialogue.
+ * Fix rare crash.
+ * Improve panel behaviour.
+ * Fix bottom panel resize bogosity.
+ * Add drag and drop support to our panels.
+ * Drag files between file panel and any panel.
+ * Use new gravatar API in edi_scm.
+ * Add AI Agents support with project-level provider settings and an AI panel.
+ * AI can edit the project (beta), use this at your own risk!!!
+ * Implement project and desktop notification status.
+ * edi_scm_ui logger shows latest commit first.
+ * SCM log browser with selectable commits and dedicated commit-change viewer.
+ * SCM log browser is searchable by title, author and e-mail.
+ * Make our about window scrolling, rolling, bowling.
+ * ...
+
+=======
+Edi 0.8
+=======
+
+Features:
+
+  * C# syntax-highlighting and project support.
+  * UI rearrangement.
+  * Internal icons.
+  * Toolbar configurable.
+  * Tab movement (dragging).
+  * Tab bar mouse scrolling.
+  * Support for EDI as standalone text editor.
+  * Improved mime type handling.
+  * Complete widget configuration in settings.
+  * API additions and improvements.
+  * Move all examples to meson.
+
+Bug fixes:
+
+  * Debugging reliability.
+  * SCM filepanel improvements.
+  * Fix wizard reliablity.
+  * Search stabililty improvements.
+  * Fixes and improvements for FreeBSD and OpenBSD.
+  * Transparancy fixes.
+  * Many stability fixes.
+  * Improvements to the EFL code widget.
+  * Improve file save behaviour.
+  * Fix welcome content black hole (Escape).
+
+=======
+Edi 0.7
+=======
+
+Features:
+
+  * Added theme support and new themes.
+  * Added editor translucency option.
+  * Added option to show hidden files
+
+Bug fixes:
+
+  * Fix issues where panels would change size or not fully shrink
+  * Improvements to the UI and flow
+  * General stability fixes with Edi and Edi SCM
+
+---------
+Edi 0.6.1
+---------
+
+Features:
+
+  * Added notification support.
+  * Added split-view option for editors.
+  * Updated project wizard and added new project templates.
+  * Include EFL examples in project wizard.
+  * Add support for Go projects.
+  * Improved debugging support.
+  * Added edi_scm helper command.
+  * Replace all in project.
+
+Bug fixes:
+
+  * overall stability of the SCM git integration
+
+=======
+Edi 0.6
+=======
+
+Features:
+
+  * Multiple panel support in main UI
+  * Integrate GDB debugger console
+  * Add snippet support to the code editor
+  * Add SCM support (git)
+  * Provide tab completion & suggestions for autosuggest and snippets
+  * Add rust language and clang build support
+  * Highlight all search results
+  * Wrap search around at end of document
+  * Add checkout project to welcome screen
+  * Add translation support
+
+Bug fixes:
+
+  * Fix issue where large projects could cause slow starts
+  * Fix T6044 Project templating fails with special characters in projects settings
+  * Fix T5480 EDI does not open window on some mime/file types
+  * Fix T1852 Search should wrap around
+
+---------
+Edi 0.5.1
+---------
+
+Features:
+
+  * menu: Indicate saved status in menu and toolbar
+  * cmdline: don't try to open unknown file types
+
+Bug fixes:
+
+  * Fix issue where replaced text could not be undone
+  * Fix python project detection
+
+
+=======
+Edi 0.5
+=======
+
+Features:
+
+  * Add support for compile command databases with clang
+  * Add Undo/Redo support
+  * Add support for basic python projects
+  * Syntax highlighting support now includes python
+  * Add inline documentation lookup using libclang
+  * Add code autosuggest using libclang
+  * Add wrap-around in search
+  * Add double click to expand/contract in the file panel
+  * Add delete and open directory in terminal menu options in file panel
+  * Add a TODO/FIXME listing panel
+  * Add search in project
+
+Bug fixes:
+
+  * Fix issues with OpenBSD
+  * filepanel: Don't filter folders when searching for files
+  * Fix duplicate files in file listing panel
+  * Reset search term when activating search
+  * Improve portability of project creation
+  * Add pkgbuild support for libedi
+  * Fix tab bar to be more like tabs
+  * Fix various stability issues
+
+
+=======
+Edi 0.4
+=======
+
+Features:
+
+  * Auto-detected build provider for project
+  * Filter file list based on ignored build files
+  * Allow filtering of file list using regular expressions
+  * Display build errors inline in editor
+  * Support opening a single file
+
+Bug fixes:
+
+  * Fix some missing icons
+  * Fix about and settings window attributes
+
+
+=======
+Edi 0.3
+=======
+
+Features:
+
+  * Option to inserts spaces instead of tabs
+  * Update to EFL 1.17 release for better toolbar handling
+  * Add file filtering for hunting down files in the list
+  * Double click to select word, triple click to select line
+  * Return of the undo feature!
+
+Bug fixes:
+
+  * Focus input popups when they appear
+  * Support fish and other non-bash shells for build & test
+  * Fix crash when deleting a selection ending with newline
+
+
+=======
+Edi 0.2
+=======
+
+Features:
+
+  * Highlight the current line when editing
+  * Update to EFL 1.16 release
+
+Bug fixes
+
+  * Correct selection so it works backwards as well
+  * Don't remove highlighting of lines when backspace/delete or newline are entered
+  * When opening unrecognised files and cancelling choice don't remember as opened
+  * Fix issue with whitespace indenting on newline when splitting at whitespace
+
+
+=======
+Edi 0.1
+=======
+
+Features:
+
+  * Added a monospaced font picker to settings
+  * Indent newlines to match whitespace in the previous line
+  * Trim trailing whitespace when saving
+
+Bug fixes
+
+  * T2057 Line numbers are not fully visible in new windows
+  * #3 assume bash as default shell when creating a new project
+  * #4 Unable to compile
+
+
+0.0.9
+-----
+
+  * New icon :)
+  * Integrated elm_code editor
+    - faster code highlighting
+    - highlighting of error lines
+    - highlighting of TODO lines
+    - line width indicator in the editor
+    - configurable tab stop width
+
+  * Add a main menu and tidy up toolbar
+  * Remember UI settings per project
+  * Add launch configuration so we can run a built binary
+
+
+0.0.2
+-----
+
+Features
+
+  * Add a settings screen to control various display features
+  * Support turning autosave on and off
+
+Bug fixes
+
+  * Fix issues with re-opening closed tabs
+  * Fix crash-on-open for some systems
+  * Fix username lookup for Windows
+
+
+0.0.1
+-----
+
+Features:
+
+  * Editing and saving text files
+  * Tabbed browsing of open files
+  * Opening editor in a new window
+  * Displaying directory for the project (directory)
+  * link files out to external viewers / editors
+  * No screen waste (toolbar, menu, tab are out of the way of the developer)
+  * info panel with logs and useful output
+  * Create new file
+
+  * Simple build functions
+  * Search  & replace in file
+  * Line numbers & go to line
+  * Creation of new projects from name input and skeleton project files
+  * Syntax highlighting
+  * Diff rendering

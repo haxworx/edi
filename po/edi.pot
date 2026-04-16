@@ -1,0 +1,876 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the edi package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: edi\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-23 21:59+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/bin/mainview/edi_mainview.c:574
+#: src/bin/mainview/edi_mainview_panel.c:584 src/bin/screens/edi_screens.c:121
+#: src/bin/screens/edi_screens.c:162 src/bin/screens/edi_welcome.c:79
+#: src/bin/screens/edi_file_screens.c:29 src/bin/edi_scm_ui.c:105
+msgid "OK"
+msgstr ""
+
+#: src/bin/mainview/edi_mainview.c:601
+msgid "Please enter a valid search term."
+msgstr ""
+
+#: src/bin/mainview/edi_mainview.c:635
+msgid "Search for (whole project)"
+msgstr ""
+
+#: src/bin/mainview/edi_mainview.c:641
+msgid "Please enter a term to search for within<br> the whole project.<br>"
+msgstr ""
+
+#: src/bin/mainview/edi_mainview.c:663 src/bin/mainview/edi_mainview.c:772
+#: src/bin/mainview/edi_mainview_panel.c:850
+#: src/bin/editor/edi_editor_search.c:531
+#: src/bin/screens/edi_file_screens.c:232
+#: src/bin/screens/edi_file_screens.c:293
+#: src/bin/screens/edi_file_screens.c:354 src/bin/edi_scm_ui.c:874
+msgid "Cancel"
+msgstr ""
+
+#: src/bin/mainview/edi_mainview.c:669 src/bin/mainview/edi_mainview.c:740
+#: src/bin/editor/edi_editor_search.c:515 src/bin/edi_main.c:432
+msgid "Search"
+msgstr ""
+
+#: src/bin/mainview/edi_mainview.c:689
+msgid "Please enter a valid search string."
+msgstr ""
+
+#: src/bin/mainview/edi_mainview.c:696
+msgid "Please enter a valid replace string."
+msgstr ""
+
+#: src/bin/mainview/edi_mainview.c:702
+msgid "Strings cannot match."
+msgstr ""
+
+#: src/bin/mainview/edi_mainview.c:724
+msgid "Search &amp; Replace"
+msgstr ""
+
+#: src/bin/mainview/edi_mainview.c:729
+msgid "Replace all occurences of text within <br>the whole project.<br>"
+msgstr ""
+
+#: src/bin/mainview/edi_mainview.c:753 src/bin/mainview/edi_mainview.c:779
+#: src/bin/editor/edi_editor_search.c:523
+msgid "Replace"
+msgstr ""
+
+#: src/bin/mainview/edi_mainview_panel.c:552
+msgid "Unrecognized file type"
+msgstr ""
+
+#: src/bin/mainview/edi_mainview_panel.c:569
+msgid ""
+"To force open, select this file in the file browser, <br>and use \"open as\" "
+"menu options."
+msgstr ""
+
+#: src/bin/mainview/edi_mainview_panel.c:824
+msgid "Enter line number"
+msgstr ""
+
+#: src/bin/mainview/edi_mainview_panel.c:856
+msgid "Go"
+msgstr ""
+
+#: src/bin/editor/edi_editor_documentation.c:63
+msgid "Parameters"
+msgstr ""
+
+#: src/bin/editor/edi_editor_documentation.c:66
+msgid "Returns"
+msgstr ""
+
+#: src/bin/editor/edi_editor_documentation.c:69
+msgid "See also"
+msgstr ""
+
+#: src/bin/editor/edi_editor_documentation.c:140
+msgid "No help available for this term"
+msgstr ""
+
+#: src/bin/editor/edi_editor_documentation.c:162 src/bin/edi_main.c:1189
+#: src/bin/edi_main.c:1272
+msgid "Close"
+msgstr ""
+
+#: src/bin/editor/edi_editor.c:76
+msgid "Confirmation"
+msgstr ""
+
+#: src/bin/editor/edi_editor.c:95
+msgid ""
+"File contents have changed. Would you like to reload <br> the contents of "
+"this file?"
+msgstr ""
+
+#: src/bin/editor/edi_editor.c:110
+msgid "Reload"
+msgstr ""
+
+#: src/bin/editor/edi_editor.c:115
+msgid "No, continue editing"
+msgstr ""
+
+#: src/bin/editor/edi_editor.c:870
+#, c-format
+msgid "Line:%d, Column:%d"
+msgstr ""
+
+#: src/bin/editor/edi_editor_search.c:463
+msgid "Search term"
+msgstr ""
+
+#: src/bin/editor/edi_editor_search.c:478
+msgid "Replace term"
+msgstr ""
+
+#: src/bin/editor/edi_editor_search.c:505
+msgid "Reached end of file, starting from beginning"
+msgstr ""
+
+#: src/bin/editor/edi_editor_search.c:509
+msgid "Wrap search?"
+msgstr ""
+
+#: src/bin/screens/edi_screens.c:40
+msgid "Confirmation required"
+msgstr ""
+
+#: src/bin/screens/edi_screens.c:72
+msgid "Yes"
+msgstr ""
+
+#: src/bin/screens/edi_screens.c:78
+msgid "No"
+msgstr ""
+
+#: src/bin/screens/edi_screens.c:150
+#, c-format
+msgid "No %s binary found, please install %s."
+msgstr ""
+
+#: src/bin/screens/edi_screens.c:153
+msgid "Unable to launch SCM binary"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:87
+msgid "Delete"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:102
+msgid "That project directory no longer exists"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:142
+msgid "Choose a Project Folder"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:179
+msgid "Select folder"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:365 src/bin/screens/edi_welcome.c:619
+msgid "Parent Path"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:366 src/bin/screens/edi_welcome.c:620
+msgid "Project Name"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:367
+msgid "Project URL"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:369 src/bin/screens/edi_welcome.c:371
+msgid "Creator Name"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:372
+msgid "Creator Email"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:375 src/bin/screens/edi_file_screens.c:299
+#: src/bin/screens/edi_file_screens.c:360
+msgid "Create"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:382 src/bin/screens/edi_welcome.c:800
+msgid "Create New Project"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:521
+msgid "Choose"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:530
+msgid "Select Project Type"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:546
+msgid "Unable to clone project, please check URL or try again later"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:618
+msgid "Source Control URL"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:629
+msgid "Checkout"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:641 src/bin/screens/edi_welcome.c:804
+msgid "Checkout Existing Project"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:745
+msgid "Welcome to Edi"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:771
+msgid "Recent Projects"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:780
+msgid "Open Existing Project"
+msgstr ""
+
+#: src/bin/screens/edi_welcome.c:809
+msgid "Choose Project"
+msgstr ""
+
+#: src/bin/screens/edi_file_screens.c:63
+msgid "Please enter a file name."
+msgstr ""
+
+#: src/bin/screens/edi_file_screens.c:80
+msgid "Unable to write file."
+msgstr ""
+
+#: src/bin/screens/edi_file_screens.c:105
+msgid "Please enter a directory name."
+msgstr ""
+
+#: src/bin/screens/edi_file_screens.c:140
+msgid "Please enter a valid name."
+msgstr ""
+
+#: src/bin/screens/edi_file_screens.c:151
+msgid "Directory with that name already exists."
+msgstr ""
+
+#: src/bin/screens/edi_file_screens.c:153
+msgid "File with that name already exists."
+msgstr ""
+
+#: src/bin/screens/edi_file_screens.c:187
+msgid "Rename directory"
+msgstr ""
+
+#: src/bin/screens/edi_file_screens.c:190
+msgid "Rename file"
+msgstr ""
+
+#: src/bin/screens/edi_file_screens.c:196
+msgid "Please enter a new name for this directory."
+msgstr ""
+
+#: src/bin/screens/edi_file_screens.c:198
+msgid "Please enter a new name for this file."
+msgstr ""
+
+#: src/bin/screens/edi_file_screens.c:239
+msgid "Rename"
+msgstr ""
+
+#: src/bin/screens/edi_file_screens.c:256
+msgid "Enter new file name"
+msgstr ""
+
+#: src/bin/screens/edi_file_screens.c:266
+msgid "Please enter a name for this new file."
+msgstr ""
+
+#: src/bin/screens/edi_file_screens.c:318
+msgid "Enter new directory name"
+msgstr ""
+
+#: src/bin/screens/edi_file_screens.c:327
+msgid "Please enter a name for this new directory."
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:125 src/bin/screens/edi_settings.c:234
+msgid "Font"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:223 src/bin/screens/edi_settings.c:854
+msgid "Display"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:253
+msgid "Color theme"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:291
+msgid "Translucent"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:307
+msgid "Alpha"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:329
+msgid "Hide Toolbar"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:346
+msgid "Editor"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:357
+msgid "Display whitespace"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:372
+msgid "Line width marker"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:391
+msgid "Tabstop"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:497
+msgid "Builds"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:508
+msgid "Runtime binary"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:520
+msgid "Select"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:541
+msgid "Runtime arguments"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:560
+msgid "Default debugger"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:656
+msgid "Project Settings"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:668
+msgid "Author Name"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:686
+msgid "Author E-mail"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:708 src/bin/edi_filepanel.c:481
+msgid "Source Control"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:724
+msgid "Remote URL"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:772 src/bin/screens/edi_settings.c:862
+msgid "Behaviour"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:776
+msgid "Auto save files"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:787
+msgid "Trim trailing whitespace"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:807
+msgid "Edi Settings"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:853 src/bin/edi_main.c:1227
+msgid "Project"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:861
+msgid "Global"
+msgstr ""
+
+#: src/bin/screens/edi_about.c:34
+#, c-format
+msgid "About Edi %s"
+msgstr ""
+
+#: src/bin/screens/edi_about.c:86
+msgid ""
+"<br>EDI is an IDE designed to get people into coding for Unix.<br>It's based "
+"on the <b>EFL</b> and written completely natively<br>to provide a "
+"<i>responsive</i> and <i>beautiful</i> UI.<br>"
+msgstr ""
+
+#: src/bin/screens/edi_about.c:95
+msgid "<hilight>EDI's lovely authors</hilight>"
+msgstr ""
+
+#: src/bin/screens/edi_about.c:128 src/bin/edi_main.c:1237
+msgid "Visit Website"
+msgstr ""
+
+#: src/bin/screens/edi_about.c:140
+msgid "Report Issue"
+msgstr ""
+
+#: src/bin/screens/edi_about.c:152
+msgid "Help Translate"
+msgstr ""
+
+#: src/bin/screens/edi_about.c:164
+msgid "Donate Now"
+msgstr ""
+
+#: src/bin/language/edi_language_provider_c.c:156
+msgid "C header"
+msgstr ""
+
+#: src/bin/language/edi_language_provider_c.c:158
+msgid "C source"
+msgstr ""
+
+#: src/bin/language/edi_language_provider_python.c:32
+msgid "Python source"
+msgstr ""
+
+#: src/bin/language/edi_language_provider_rust.c:32
+msgid "Rust source"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:366 src/bin/edi_filepanel.c:423
+#: src/bin/edi_filepanel.c:544
+#, c-format
+msgid "Are you sure you want to delete <hilight>%s</hilight> ?"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:463
+msgid "Open"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:464
+msgid "Open in New Window"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:466
+msgid "Open in New Panel"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:468
+msgid "Open as"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:473
+msgid "Open External"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:483 src/bin/edi_scm_ui.c:612
+msgid "Stage Changes"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:487 src/bin/edi_scm_ui.c:616
+msgid "Unstage Changes"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:492 src/bin/edi_filepanel.c:497
+msgid "Rename File"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:493 src/bin/edi_filepanel.c:498
+msgid "Delete File"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:591
+msgid "Create File here"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:592
+msgid "Create Directory here"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:594
+msgid "Open Terminal here"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:598
+msgid "Rename Directory"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:600
+msgid "Remove Directory"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:729 src/bin/edi_scm_ui.c:292
+msgid "Staged changes"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:740 src/bin/edi_scm_ui.c:303
+msgid "Unstaged changes"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:742 src/bin/edi_scm_ui.c:305
+msgid "Untracked changes"
+msgstr ""
+
+#: src/bin/edi_filepanel.c:1143 src/bin/edi_main.c:1205
+msgid "Find file"
+msgstr ""
+
+#: src/bin/edi_build_main.c:63
+#, c-format
+msgid "Project created at path %s\n"
+msgstr ""
+
+#: src/bin/edi_build_main.c:66
+#, c-format
+msgid "Unable to create project at path %s\n"
+msgstr ""
+
+#: src/bin/edi_build_main.c:77
+#, c-format
+msgid "Building \"%s\" target [%s] using [%s].\n"
+msgstr ""
+
+#: src/bin/edi_build_main.c:83
+#, c-format
+msgid "Target [%s] not supported for builder [%s].\n"
+msgstr ""
+
+#: src/bin/edi_build_main.c:167
+#, c-format
+msgid "create requires 6 additional parameters:\n"
+msgstr ""
+
+#: src/bin/edi_build_main.c:181
+#, c-format
+msgid "Cowardly refusing to build unknown project type.\n"
+msgstr ""
+
+#: src/bin/edi_build_main.c:197
+#, c-format
+msgid "Unrecognized build type - try build, clean, create or test.\n"
+msgstr ""
+
+#: src/bin/edi_main.c:70
+msgid "File path required"
+msgstr ""
+
+#: src/bin/edi_main.c:71
+msgid "Please choose a file from the list."
+msgstr ""
+
+#: src/bin/edi_main.c:420
+msgid "Logs"
+msgstr ""
+
+#: src/bin/edi_main.c:424
+msgid "Console"
+msgstr ""
+
+#: src/bin/edi_main.c:428
+msgid "Tests"
+msgstr ""
+
+#: src/bin/edi_main.c:436
+msgid "Tasks"
+msgstr ""
+
+#: src/bin/edi_main.c:440 src/bin/edi_main.c:1299
+msgid "Debug"
+msgstr ""
+
+#: src/bin/edi_main.c:564
+msgid "Unable to launch"
+msgstr ""
+
+#: src/bin/edi_main.c:565
+msgid "No launch binary found, please configure in Settings."
+msgstr ""
+
+#: src/bin/edi_main.c:575
+msgid "Unable to launch debugger"
+msgstr ""
+
+#: src/bin/edi_main.c:576
+msgid "No debug binary found, please check system configuration and Settings."
+msgstr ""
+
+#: src/bin/edi_main.c:587
+msgid "Missing user information"
+msgstr ""
+
+#: src/bin/edi_main.c:588
+msgid "No user information found, please configure in Settings."
+msgstr ""
+
+#: src/bin/edi_main.c:695
+msgid "Cowardly refusing to build unknown project type."
+msgstr ""
+
+#: src/bin/edi_main.c:734
+#, c-format
+msgid "%s of project <b>%s</b> in %s failed with status code %d.\n"
+msgstr ""
+
+#: src/bin/edi_main.c:736
+#, c-format
+msgid "%s of project <b>%s</b> in %s was successful.\n"
+msgstr ""
+
+#: src/bin/edi_main.c:738
+#, c-format
+msgid "%s %s"
+msgstr ""
+
+#: src/bin/edi_main.c:738
+msgid "Failed"
+msgstr ""
+
+#: src/bin/edi_main.c:738
+msgid "Passed"
+msgstr ""
+
+#: src/bin/edi_main.c:759 src/bin/edi_main.c:1218 src/bin/edi_main.c:1219
+#: src/bin/edi_main.c:1296
+msgid "Build"
+msgstr ""
+
+#: src/bin/edi_main.c:773 src/bin/edi_main.c:1222
+msgid "Clean"
+msgstr ""
+
+#: src/bin/edi_main.c:787 src/bin/edi_main.c:1220 src/bin/edi_main.c:1297
+msgid "Test"
+msgstr ""
+
+#: src/bin/edi_main.c:1120
+msgid "Are you sure you wish to stash these changes?"
+msgstr ""
+
+#: src/bin/edi_main.c:1183
+msgid "File"
+msgstr ""
+
+#: src/bin/edi_main.c:1184
+msgid "New Project"
+msgstr ""
+
+#: src/bin/edi_main.c:1186
+msgid "New"
+msgstr ""
+
+#: src/bin/edi_main.c:1187
+msgid "New Directory"
+msgstr ""
+
+#: src/bin/edi_main.c:1188 src/bin/edi_main.c:1271
+msgid "Save"
+msgstr ""
+
+#: src/bin/edi_main.c:1190
+msgid "Close all"
+msgstr ""
+
+#: src/bin/edi_main.c:1192 src/bin/edi_main.c:1304
+msgid "Settings"
+msgstr ""
+
+#: src/bin/edi_main.c:1194
+msgid "Quit"
+msgstr ""
+
+#: src/bin/edi_main.c:1196
+msgid "Edit"
+msgstr ""
+
+#: src/bin/edi_main.c:1197 src/bin/edi_main.c:1277
+msgid "Undo"
+msgstr ""
+
+#: src/bin/edi_main.c:1198 src/bin/edi_main.c:1278
+msgid "Redo"
+msgstr ""
+
+#: src/bin/edi_main.c:1200 src/bin/edi_main.c:1283
+msgid "Cut"
+msgstr ""
+
+#: src/bin/edi_main.c:1201 src/bin/edi_main.c:1284
+msgid "Copy"
+msgstr ""
+
+#: src/bin/edi_main.c:1202 src/bin/edi_main.c:1285
+msgid "Paste"
+msgstr ""
+
+#: src/bin/edi_main.c:1204
+msgid "Find & Replace"
+msgstr ""
+
+#: src/bin/edi_main.c:1206 src/bin/edi_main.c:1291
+msgid "Goto Line"
+msgstr ""
+
+#: src/bin/edi_main.c:1208
+msgid "Find in project"
+msgstr ""
+
+#: src/bin/edi_main.c:1209
+msgid "Replace in project"
+msgstr ""
+
+#: src/bin/edi_main.c:1211
+msgid "View"
+msgstr ""
+
+#: src/bin/edi_main.c:1212
+msgid "New Window"
+msgstr ""
+
+#: src/bin/edi_main.c:1213
+msgid "New Panel"
+msgstr ""
+
+#: src/bin/edi_main.c:1214
+msgid "Split View"
+msgstr ""
+
+#: src/bin/edi_main.c:1216
+msgid "Open Tasks"
+msgstr ""
+
+#: src/bin/edi_main.c:1221 src/bin/edi_main.c:1298
+msgid "Run"
+msgstr ""
+
+#: src/bin/edi_main.c:1224
+msgid "Debugger"
+msgstr ""
+
+#: src/bin/edi_main.c:1225
+msgid "Memcheck"
+msgstr ""
+
+#: src/bin/edi_main.c:1228
+msgid "Init"
+msgstr ""
+
+#: src/bin/edi_main.c:1229 src/bin/edi_scm_ui.c:884
+msgid "Commit"
+msgstr ""
+
+#: src/bin/edi_main.c:1230
+msgid "Stash"
+msgstr ""
+
+#: src/bin/edi_main.c:1231
+msgid "Status"
+msgstr ""
+
+#: src/bin/edi_main.c:1232
+msgid "Push"
+msgstr ""
+
+#: src/bin/edi_main.c:1233
+msgid "Pull"
+msgstr ""
+
+#: src/bin/edi_main.c:1236
+msgid "Help"
+msgstr ""
+
+#: src/bin/edi_main.c:1239 src/bin/edi_main.c:1305
+msgid "About"
+msgstr ""
+
+#: src/bin/edi_main.c:1270
+msgid "New File"
+msgstr ""
+
+#: src/bin/edi_main.c:1290
+msgid "Find"
+msgstr ""
+
+#: src/bin/edi_main.c:1493
+#, c-format
+msgid "Project path must be a directory\n"
+msgstr ""
+
+#: src/bin/edi_main.c:1709
+#, c-format
+msgid "Could not open file of unsupported mime type (%s)\n"
+msgstr ""
+
+#: src/bin/edi_scm_ui.c:152
+msgid "Please enter a valid commit message."
+msgstr ""
+
+#: src/bin/edi_scm_ui.c:690
+msgid "User information"
+msgstr ""
+
+#: src/bin/edi_scm_ui.c:729
+msgid "Unable to obtain user information."
+msgstr ""
+
+#: src/bin/edi_scm_ui.c:735
+msgid "Author"
+msgstr ""
+
+#: src/bin/edi_scm_ui.c:747
+msgid "Show unstaged changes"
+msgstr ""
+
+#: src/bin/edi_scm_ui.c:786
+msgid "File changes"
+msgstr ""
+
+#: src/bin/edi_scm_ui.c:810
+msgid "Commit message"
+msgstr ""
+
+#: src/bin/edi_scm_ui.c:815
+msgid "Enter commit summary<br><br>And change details<br>"
+msgstr ""
+
+#: src/bin/edi_scm_ui.c:834
+msgid "Source changes"
+msgstr ""
+
+#: src/bin/edi_consolepanel.c:186
+#, c-format
+msgid "Total pass %d (%d%%), fail %d)"
+msgstr ""

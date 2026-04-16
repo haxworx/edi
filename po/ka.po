@@ -1,0 +1,966 @@
+# Georgian translation for edi
+# Copyright (C) 2022, edi authors
+# This file is distributed under the same license as the edi package.
+# Temuri Doghonadze <temuri.doghonadze@gmail.com>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: edi\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-25 10:24+0200\n"
+"PO-Revision-Date: 2022-10-27 20:42+0200\n"
+"Last-Translator: Temuri Doghonadze <temuri.doghonadze@gmail.com>\n"
+"Language-Team: Georgian <(nothing)>\n"
+"Language: ka\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.2\n"
+
+#: src/bin/mainview/edi_mainview.c:464
+#: src/bin/mainview/edi_mainview_panel.c:776 src/bin/screens/edi_screens.c:127
+#: src/bin/screens/edi_screens.c:187 src/bin/screens/edi_screens.c:242
+#: src/bin/screens/edi_welcome.c:85 src/bin/screens/edi_file_screens.c:29
+#: src/bin/edi_scm_ui.c:103
+msgid "OK"
+msgstr "დიახ"
+
+#: src/bin/mainview/edi_mainview.c:507
+msgid "Strings cannot match."
+msgstr "სტრიქონები ვერ ემთხვევა."
+
+#: src/bin/mainview/edi_mainview.c:529
+msgid "Search &amp; Replace"
+msgstr "ძებნა და ჩანაცვლება"
+
+#: src/bin/mainview/edi_mainview.c:534
+msgid "Replace all occurences of text within <br>the whole project.<br>"
+msgstr "ამ ტექსტის მთლიან პროექტში<br>ყველა გამოჩენის ჩანაცვლება.<br>"
+
+#: src/bin/mainview/edi_mainview.c:545 src/bin/editor/edi_editor_search.c:514
+#: src/bin/edi_main.c:497 src/bin/edi_searchpanel.c:600
+#: src/bin/edi_searchpanel.c:649 src/bin/edi_searchpanel.c:677
+msgid "Search"
+msgstr "ძებნა"
+
+#: src/bin/mainview/edi_mainview.c:558 src/bin/mainview/edi_mainview.c:584
+#: src/bin/editor/edi_editor_search.c:522
+msgid "Replace"
+msgstr "შეცვლა"
+
+#: src/bin/mainview/edi_mainview.c:577
+#: src/bin/mainview/edi_mainview_panel.c:1098
+#: src/bin/editor/edi_editor_search.c:530
+#: src/bin/screens/edi_file_screens.c:232
+#: src/bin/screens/edi_file_screens.c:293
+#: src/bin/screens/edi_file_screens.c:354 src/bin/edi_searchpanel.c:633
+#: src/bin/edi_scm_ui.c:877
+msgid "Cancel"
+msgstr "შეწყვეტა"
+
+#: src/bin/mainview/edi_mainview_panel.c:744
+msgid "Unrecognized file type"
+msgstr "ფაილის უცნობი ტიპი"
+
+#: src/bin/mainview/edi_mainview_panel.c:761
+msgid ""
+"To force open, select this file in the file browser, <br>and use \"open as\" "
+"menu options."
+msgstr ""
+"ძალით გასახსნელად, მონიშნეთ ფაილი ბრაუზერში <br> და გამოიყენეთ მენიუს პუნქტი "
+"\"გახსნა პროგრამით\"."
+
+#: src/bin/mainview/edi_mainview_panel.c:1072
+msgid "Enter line number"
+msgstr "შეიყვანეთ ხაზის ნომერი"
+
+#: src/bin/mainview/edi_mainview_panel.c:1104
+msgid "Go"
+msgstr "გადასვლა"
+
+#: src/bin/editor/edi_editor_documentation.c:63
+msgid "Parameters"
+msgstr "პარამეტრები"
+
+#: src/bin/editor/edi_editor_documentation.c:66
+msgid "Returns"
+msgstr "აბრუნებს"
+
+#: src/bin/editor/edi_editor_documentation.c:69
+msgid "See also"
+msgstr "ასევე იხილეთ"
+
+#: src/bin/editor/edi_editor_documentation.c:140
+msgid "No help available for this term"
+msgstr "ამ ელემენტისთვის დახმარება მიუწვდომელია"
+
+#: src/bin/editor/edi_editor_documentation.c:162 src/bin/edi_main.c:1318
+#: src/bin/edi_main.c:1516 src/bin/edi_scm_ui.c:670
+msgid "Close"
+msgstr "დაკეტვა"
+
+#: src/bin/editor/edi_editor.c:77
+msgid "Permission Denied"
+msgstr "წვდომა აკრძალულია"
+
+#: src/bin/editor/edi_editor.c:96
+msgid ""
+"Unable to save file. Would you like to reload <br> the contents of this file?"
+msgstr ""
+"ფაილის ჩაწერის შეცდომა. გნებავთ <br>ამ ფაილის შემცველობის თავიდან ჩატვირთვა?"
+
+#: src/bin/editor/edi_editor.c:111 src/bin/editor/edi_editor.c:169
+msgid "Reload"
+msgstr "თავიდან ჩატვირთვა"
+
+#: src/bin/editor/edi_editor.c:116 src/bin/editor/edi_editor.c:174
+msgid "No, continue editing"
+msgstr "არა, გავაგრძელოთ ჩასწორება"
+
+#: src/bin/editor/edi_editor.c:135
+msgid "Confirmation"
+msgstr "დასტური"
+
+#: src/bin/editor/edi_editor.c:154
+msgid ""
+"File contents have changed. Would you like to reload <br> the contents of "
+"this file?"
+msgstr ""
+"ფაილის შემცველობა შეიცვალა. გნებავთ <br>ამ ფაილის შემცველობის თავიდან "
+"ჩატვირთვა?"
+
+#: src/bin/editor/edi_editor_search.c:463
+msgid "Search term"
+msgstr "ძებნის პირობა"
+
+#: src/bin/editor/edi_editor_search.c:478
+msgid "Replace term"
+msgstr "ჩანაცვლების პირობა"
+
+#: src/bin/editor/edi_editor_search.c:504
+msgid "Reached end of file, starting from beginning"
+msgstr "მიღწეულია ფაილის ბოლო. თავიდან დაწყება"
+
+#: src/bin/editor/edi_editor_search.c:508
+msgid "Wrap Search"
+msgstr "ძებნის გადატანა"
+
+#: src/bin/screens/edi_screens.c:46
+msgid "Confirmation required"
+msgstr "საჭიროა თანხმობა"
+
+#: src/bin/screens/edi_screens.c:78
+msgid "Yes"
+msgstr "კი"
+
+#: src/bin/screens/edi_screens.c:84
+msgid "No"
+msgstr "არა"
+
+#: src/bin/screens/edi_screens.c:192 src/bin/edi_main.c:1321
+#: src/bin/edi_main.c:1554
+msgid "Settings"
+msgstr "&მორგება"
+
+#: src/bin/screens/edi_screens.c:230
+#, c-format
+msgid "No %s binary found, please install %s."
+msgstr "%s-ის გამშვები ფაილი ვერ ვიპოვე. დააყენეთ %s."
+
+#: src/bin/screens/edi_screens.c:233
+msgid "Unable to launch SCM binary"
+msgstr "SCM-ის გამშვები ფაილის შესრულების შეცდომა"
+
+#: src/bin/screens/edi_welcome.c:93
+msgid "Delete"
+msgstr "წაშლა"
+
+#: src/bin/screens/edi_welcome.c:108
+msgid "That project directory no longer exists"
+msgstr "პროექტის საქაღალდე აღარ არსებობს"
+
+#: src/bin/screens/edi_welcome.c:151
+msgid "Choose a Project Folder"
+msgstr "აირჩიეთ პროექტის საქაღალდე"
+
+#: src/bin/screens/edi_welcome.c:187
+msgid "Select folder"
+msgstr "საქაღალდეს არჩევა"
+
+#: src/bin/screens/edi_welcome.c:421
+#, c-format
+msgid "%s already exists"
+msgstr "%s უკვე არსებობს"
+
+#: src/bin/screens/edi_welcome.c:494 src/bin/screens/edi_welcome.c:787
+msgid "Parent Path"
+msgstr "მშობელი ბილიკი"
+
+#: src/bin/screens/edi_welcome.c:495 src/bin/screens/edi_welcome.c:788
+msgid "Project Name"
+msgstr "პროექტის სახელი"
+
+#: src/bin/screens/edi_welcome.c:499
+msgid "Project URL"
+msgstr "პროექტი URL"
+
+#: src/bin/screens/edi_welcome.c:501 src/bin/screens/edi_welcome.c:503
+msgid "Creator Name"
+msgstr "ავტორის სახელი"
+
+#: src/bin/screens/edi_welcome.c:504
+msgid "Creator Email"
+msgstr "ავტორის ელფოსტა"
+
+#: src/bin/screens/edi_welcome.c:517 src/bin/screens/edi_file_screens.c:299
+#: src/bin/screens/edi_file_screens.c:360
+msgid "Create"
+msgstr "შექმნა"
+
+#: src/bin/screens/edi_welcome.c:524 src/bin/screens/edi_welcome.c:974
+msgid "Create New Project"
+msgstr "ახალი პროექტის შექმნა"
+
+#: src/bin/screens/edi_welcome.c:666
+msgid "Templates"
+msgstr "შაბლონები"
+
+#: src/bin/screens/edi_welcome.c:678
+msgid "Examples"
+msgstr "მაგალითები"
+
+#: src/bin/screens/edi_welcome.c:688
+msgid "Choose"
+msgstr "აირჩიეთ"
+
+#: src/bin/screens/edi_welcome.c:698
+msgid "Select Project Type"
+msgstr "აირჩიეთ პროექტის ტიპი"
+
+#: src/bin/screens/edi_welcome.c:714
+msgid "Unable to clone project, please check URL or try again later"
+msgstr "პროექტის კლონირების შეცდომა. გადაამოწმეთ URL და თავიდან სცადეთ"
+
+#: src/bin/screens/edi_welcome.c:786
+msgid "Source Control URL"
+msgstr "კოდის კონტროლის URL"
+
+#: src/bin/screens/edi_welcome.c:797
+msgid "Checkout"
+msgstr "წამოღება"
+
+#: src/bin/screens/edi_welcome.c:809 src/bin/screens/edi_welcome.c:978
+msgid "Checkout Existing Project"
+msgstr "არსებული პროექტის გადმოტანა"
+
+#: src/bin/screens/edi_welcome.c:919
+msgid "Welcome to Edi"
+msgstr "კეთილი იყოს თქვენი მობრძანება Edi-ში"
+
+#: src/bin/screens/edi_welcome.c:945
+msgid "Recent Projects"
+msgstr "ახლახანს გახსნილი პროექტები"
+
+#: src/bin/screens/edi_welcome.c:954
+msgid "Open Existing Project"
+msgstr "არსებული პროექტის გახსნა"
+
+#: src/bin/screens/edi_welcome.c:983
+msgid "Choose Project"
+msgstr "აირჩიეთ პროექტი"
+
+#: src/bin/screens/edi_file_screens.c:63
+msgid "Please enter a file name."
+msgstr "შეიყვანეთ ფაილის სახელი."
+
+#: src/bin/screens/edi_file_screens.c:80
+msgid "Unable to write file."
+msgstr "ფაილში ჩაწერის შეცდომა."
+
+#: src/bin/screens/edi_file_screens.c:105
+msgid "Please enter a directory name."
+msgstr "შეიყვანეთ საქაღალდის სწორი სახელი."
+
+#: src/bin/screens/edi_file_screens.c:140
+msgid "Please enter a valid name."
+msgstr "გთხოვთ შეიყვანოთ სწორი სახელი."
+
+#: src/bin/screens/edi_file_screens.c:151
+msgid "Directory with that name already exists."
+msgstr "საქაღალდე ამ სახელით უკვე არსებობს."
+
+#: src/bin/screens/edi_file_screens.c:153
+msgid "File with that name already exists."
+msgstr "ფაილი ამ სახელით უკვე არსებობს."
+
+#: src/bin/screens/edi_file_screens.c:187
+msgid "Rename directory"
+msgstr "საქაღალდისთვის სახელის გადარქმევა"
+
+#: src/bin/screens/edi_file_screens.c:190
+msgid "Rename file"
+msgstr "ფაილის გადარქმევა"
+
+#: src/bin/screens/edi_file_screens.c:196
+msgid "Please enter a new name for this directory."
+msgstr "შეიყვანეთ ამ საქაღალდის ახალი სახელი."
+
+#: src/bin/screens/edi_file_screens.c:198
+msgid "Please enter a new name for this file."
+msgstr "შეიყვანეთ ამ ფაილის ახალი სახელი."
+
+#: src/bin/screens/edi_file_screens.c:239
+msgid "Rename"
+msgstr "%1 სურათის სახელის გადარქმევა"
+
+#: src/bin/screens/edi_file_screens.c:256
+msgid "Enter new file name"
+msgstr "შეიყვანეთ ახალი ფაილის სახელი"
+
+#: src/bin/screens/edi_file_screens.c:266
+msgid "Please enter a name for this new file."
+msgstr "შეიყვანეთ ახალი ფაილის სახელი."
+
+#: src/bin/screens/edi_file_screens.c:318
+msgid "Enter new directory name"
+msgstr "შეიყვანეთ ახალი საქაღალდის სახელი"
+
+#: src/bin/screens/edi_file_screens.c:327
+msgid "Please enter a name for this new directory."
+msgstr "შეიყვანეთ ახალი საქაღალდის სახელი."
+
+#: src/bin/screens/edi_settings.c:170 src/bin/screens/edi_settings.c:300
+msgid "Font"
+msgstr "შრიფტი"
+
+#: src/bin/screens/edi_settings.c:287 src/bin/screens/edi_settings.c:1025
+msgid "Display"
+msgstr "ეკრანი"
+
+#: src/bin/screens/edi_settings.c:319
+msgid "Color theme"
+msgstr "ფერის თემა"
+
+#: src/bin/screens/edi_settings.c:352
+msgid "Translucent"
+msgstr "გამჭვირვალე"
+
+#: src/bin/screens/edi_settings.c:368
+msgid "Alpha"
+msgstr "ალფა"
+
+#: src/bin/screens/edi_settings.c:389
+msgid "Toolbar"
+msgstr "ხელსაწყოთა ზოლი"
+
+#: src/bin/screens/edi_settings.c:401
+msgid "Hide Toolbar"
+msgstr "ხელსაწყოთა ზოლის დამალვა"
+
+#: src/bin/screens/edi_settings.c:411
+msgid "Horizontal Toolbar"
+msgstr "ჰორიზონტალური ხელსაწყოების ზოლი"
+
+#: src/bin/screens/edi_settings.c:422
+msgid "Show Toolbar Text"
+msgstr "ხელსაწყოთა ზოლის ტექსტის ჩვენება"
+
+#: src/bin/screens/edi_settings.c:432
+msgid "Internal Icons"
+msgstr "შიდა ხატულები"
+
+#: src/bin/screens/edi_settings.c:442
+msgid "Editor"
+msgstr "რედაქტორი"
+
+#: src/bin/screens/edi_settings.c:454
+msgid "Display line numbers"
+msgstr "ხაზების ნომრების ჩვენება"
+
+#: src/bin/screens/edi_settings.c:464
+msgid "Line width marker"
+msgstr "ხაზი სანიშნით"
+
+#: src/bin/screens/edi_settings.c:484
+msgid "Tabstop"
+msgstr ""
+
+#: src/bin/screens/edi_settings.c:504
+msgid "Display whitespace"
+msgstr "ცარიელი ადგილების ჩვეება"
+
+#: src/bin/screens/edi_settings.c:514
+msgid "Display line width marker"
+msgstr "ხაზის სისქის მარკერის ჩვენება"
+
+#: src/bin/screens/edi_settings.c:607 src/bin/screens/edi_settings.c:1027
+msgid "Builds"
+msgstr "აგებები"
+
+#: src/bin/screens/edi_settings.c:618
+msgid "Runtime binary"
+msgstr "გამშვები ფაილი"
+
+#: src/bin/screens/edi_settings.c:632
+msgid "Select"
+msgstr "აირჩიეთ"
+
+#: src/bin/screens/edi_settings.c:652
+msgid "Runtime arguments"
+msgstr "გამშვების არგუმენტები"
+
+#: src/bin/screens/edi_settings.c:671
+msgid "Default debugger"
+msgstr "ნაგულისხმები გამმართველი"
+
+#: src/bin/screens/edi_settings.c:792
+msgid "Project Settings"
+msgstr "პროექტის პარამეტრები"
+
+#: src/bin/screens/edi_settings.c:804
+msgid "Author Name"
+msgstr "ავტორის სახელი"
+
+#: src/bin/screens/edi_settings.c:822
+msgid "Author E-mail"
+msgstr "ავტორის ელფოსტა"
+
+#: src/bin/screens/edi_settings.c:843 src/bin/edi_filepanel.c:502
+msgid "Source Control"
+msgstr "კოდის კონტროლი"
+
+#: src/bin/screens/edi_settings.c:859
+msgid "Remote URL"
+msgstr "დაშორებული URL"
+
+#: src/bin/screens/edi_settings.c:920 src/bin/screens/edi_settings.c:1035
+msgid "Behaviour"
+msgstr "ქცევა"
+
+#: src/bin/screens/edi_settings.c:924
+msgid "Auto save files"
+msgstr "ფაილების ავტომატური შენახვა"
+
+#: src/bin/screens/edi_settings.c:935
+msgid "Trim trailing whitespace"
+msgstr "ბოლო ცარიელი ადგილის მოჭრა"
+
+#: src/bin/screens/edi_settings.c:944
+msgid "Show hidden files"
+msgstr "დამალული ფაილების ჩვენება"
+
+#: src/bin/screens/edi_settings.c:977
+msgid "Edi Settings"
+msgstr "Edi -ის მორგება"
+
+#: src/bin/screens/edi_settings.c:1024 src/bin/edi_main.c:1364
+msgid "Project"
+msgstr "პროექტი"
+
+#: src/bin/screens/edi_settings.c:1031
+msgid "Global"
+msgstr "გლობალური"
+
+#: src/bin/screens/edi_about.c:34
+#, c-format
+msgid "About Edi %s"
+msgstr "Edi %s-ის შესახებ"
+
+#: src/bin/screens/edi_about.c:85
+msgid ""
+"<br>EDI is an IDE designed to get people into coding for Unix.<br>It's based "
+"on the <b>EFL</b> and written completely natively<br>to provide a "
+"<i>responsive</i> and <i>beautiful</i> UI.<br>"
+msgstr ""
+
+#: src/bin/screens/edi_about.c:94
+msgid "<hilight>EDI's lovely authors</hilight>"
+msgstr "<hilight>EDI-ის უსაყვარლესი ავტორები</hilight>"
+
+#: src/bin/screens/edi_about.c:127 src/bin/edi_main.c:1379
+msgid "Visit Website"
+msgstr "საიტზე გადასვლა"
+
+#: src/bin/screens/edi_about.c:139
+msgid "Report Issues"
+msgstr "პრობლემების შეტყობინება"
+
+#: src/bin/edi_debugpanel.c:339 src/bin/edi_main.c:505 src/bin/edi_main.c:1548
+msgid "Debug"
+msgstr "პროგრამის შეცდომის პოვნა"
+
+#: src/bin/edi_debugpanel.c:388
+msgid "Start"
+msgstr "გაშვება"
+
+#: src/bin/edi_debugpanel.c:397 src/bin/edi_main.c:1323
+msgid "Quit"
+msgstr "&გასვლა"
+
+#: src/bin/language/edi_language_provider_c.c:156
+msgid "C header"
+msgstr "C-ის თავსართი"
+
+#: src/bin/language/edi_language_provider_c.c:158
+msgid "C source"
+msgstr "C-ის საწყისი კოდი"
+
+#: src/bin/language/edi_language_provider_python.c:32
+msgid "Python source"
+msgstr "Python-ის კოდი"
+
+#: src/bin/language/edi_language_provider_rust.c:32
+msgid "Rust source"
+msgstr "Rust-ის კოდი"
+
+#: src/bin/edi_filepanel.c:373 src/bin/edi_filepanel.c:444
+#: src/bin/edi_filepanel.c:594
+#, c-format
+msgid "Are you sure you want to delete <hilight>%s</hilight> ?"
+msgstr "დარწმუნებული ბრძანდებით, რომ გნებავთ, წაშალოთ <hilight>%s</hilight> ?"
+
+#: src/bin/edi_filepanel.c:482
+msgid "Open"
+msgstr "გახსნა"
+
+#: src/bin/edi_filepanel.c:483
+msgid "Open in New Window"
+msgstr "ახალ ფანჯარაში გახსნა"
+
+#: src/bin/edi_filepanel.c:485
+msgid "Open in New Panel"
+msgstr "ახალ პანელში გახსნა"
+
+#: src/bin/edi_filepanel.c:489
+msgid "Open as"
+msgstr "გახსნა, როგორც"
+
+#: src/bin/edi_filepanel.c:495
+msgid "Open External"
+msgstr "გარე პროგრამაში გახსნა"
+
+#: src/bin/edi_filepanel.c:504
+msgid "Undo Changes"
+msgstr "ცვლილებების გაუქმება"
+
+#: src/bin/edi_filepanel.c:510 src/bin/edi_scm_ui.c:544
+msgid "Stage Changes"
+msgstr "ცვლილებების რიგში ჩასმა"
+
+#: src/bin/edi_filepanel.c:514 src/bin/edi_scm_ui.c:548
+msgid "Unstage Changes"
+msgstr "ცვლილებების რიგიდან მოცილება"
+
+#: src/bin/edi_filepanel.c:519 src/bin/edi_filepanel.c:524
+msgid "Rename File"
+msgstr "ფაილის გადარქმევა"
+
+#: src/bin/edi_filepanel.c:520 src/bin/edi_filepanel.c:525
+msgid "Delete File"
+msgstr "ფაილის წაშლა"
+
+#: src/bin/edi_filepanel.c:639
+msgid "Create File here"
+msgstr "ფაილის აქ შექმნა"
+
+#: src/bin/edi_filepanel.c:640
+msgid "Create Directory here"
+msgstr "საქაღალდის აქ შექმნა"
+
+#: src/bin/edi_filepanel.c:642
+msgid "Open Terminal here"
+msgstr "ტერმინალის გახსნა აქ"
+
+#: src/bin/edi_filepanel.c:646
+msgid "Rename Directory"
+msgstr "საქაღალდისთვის სახელის გადარქმევა"
+
+#: src/bin/edi_filepanel.c:648
+msgid "Remove Directory"
+msgstr "საქაღალდის წაშლა"
+
+#: src/bin/edi_filepanel.c:653
+msgid "Open with Rage"
+msgstr "Rage-ით გახსნა"
+
+#: src/bin/edi_filepanel.c:779 src/bin/edi_scm_ui.c:291
+msgid "Staged changes"
+msgstr "რიგში მყოფი ცვლილებები"
+
+#: src/bin/edi_filepanel.c:790 src/bin/edi_scm_ui.c:302
+msgid "Unstaged changes"
+msgstr "რიგიდან მოცილებული ცვლილებები"
+
+#: src/bin/edi_filepanel.c:792 src/bin/edi_scm_ui.c:304
+msgid "Untracked changes"
+msgstr "მიუთვალყურებელი ცვლილებები"
+
+#: src/bin/edi_filepanel.c:1229 src/bin/edi_main.c:1334
+msgid "Find file"
+msgstr "ფაილის ძებნა"
+
+#: src/bin/edi_build_main.c:63
+#, c-format
+msgid "Project created at path %s\n"
+msgstr "პროექტი შეიქმნა ბილიკზე %s\n"
+
+#: src/bin/edi_build_main.c:66
+#, c-format
+msgid "Unable to create project at path %s\n"
+msgstr "ბილიკზე %s პროექტის შექმნა შეუძლებელია\n"
+
+#: src/bin/edi_build_main.c:77
+#, c-format
+msgid "Building \"%s\" target [%s] using [%s].\n"
+msgstr "მიმდინარეობს აგება \"%s\" სამიზნე [%s] გამოიყენება [%s].\n"
+
+#: src/bin/edi_build_main.c:83
+#, c-format
+msgid "Target [%s] not supported for builder [%s].\n"
+msgstr "სამიზნე [%s] ამგების [%s] მიერ მხარდაჭერილი არაა.\n"
+
+#: src/bin/edi_build_main.c:175
+#, c-format
+msgid "create requires 6 additional parameters:\n"
+msgstr "შექმნას 6 დამატებითი პარამეტრი ესაჭიროება:\n"
+
+#: src/bin/edi_build_main.c:190
+#, c-format
+msgid "example requires 3 additional parameters:\n"
+msgstr "მაგალითს 3 დამატებითი პარამეტრი ესაჭიროება:\n"
+
+#: src/bin/edi_build_main.c:203
+#, c-format
+msgid "Cowardly refusing to build unknown project type.\n"
+msgstr "უცნობი ტიპის პროექტის აგების ცივი უარი.\n"
+
+#: src/bin/edi_build_main.c:219
+#, c-format
+msgid "Unrecognized build type - try build, clean, create or test.\n"
+msgstr ""
+"აგების უცნობი ტიპი - სცადეთ build (აგება), clean (გასუფთავება), create "
+"(შექმნა) ან test (ტესტირება).\n"
+
+#: src/bin/edi_main.c:122
+msgid "File path required"
+msgstr "ფაილის ბილიკი აუცილებელია"
+
+#: src/bin/edi_main.c:123
+msgid "Please choose a file from the list."
+msgstr "აირჩიეთ ფაილი სიიდან."
+
+#: src/bin/edi_main.c:485 src/bin/edi_logpanel.c:89
+msgid "Logs"
+msgstr "ჟურნალი"
+
+#: src/bin/edi_main.c:489 src/bin/edi_consolepanel.c:377
+msgid "Console"
+msgstr "კონსოლი"
+
+#: src/bin/edi_main.c:493 src/bin/edi_consolepanel.c:412
+msgid "Tests"
+msgstr "ტესტი"
+
+#: src/bin/edi_main.c:501 src/bin/edi_searchpanel.c:777
+msgid "Tasks"
+msgstr "ამოცანები"
+
+#: src/bin/edi_main.c:640
+msgid "Unable to launch"
+msgstr "გაშვება შეუძლებელია"
+
+#: src/bin/edi_main.c:641
+msgid "No launch binary found, please configure in Settings."
+msgstr "გამშვები ფაილები ვერ ვიპოვე. პარამეტრებში მათი მითითება აუცილებელია."
+
+#: src/bin/edi_main.c:651
+msgid "Unable to launch debugger"
+msgstr "გამმართველის გაშვება შეუძლებელია"
+
+#: src/bin/edi_main.c:652
+msgid "No debug binary found, please check system configuration and Settings."
+msgstr ""
+"გამმართველის გამშვები ფაილები ვერ ვიპოვე. შეამოწმეთ სისტემის კონფიგურაცია და "
+"პარამეტრები."
+
+#: src/bin/edi_main.c:663
+msgid "Missing user information"
+msgstr "მომხმარებლის ინფორმაციის გარეშე"
+
+#: src/bin/edi_main.c:664
+msgid "No user information found, please configure in Settings."
+msgstr ""
+"მომხმარებლის ინფორმაცია ვერ ვიპოვე. პარამეტრებში მათი მითითება აუცილებელია."
+
+#: src/bin/edi_main.c:777
+msgid "Cowardly refusing to build unknown project type."
+msgstr "უცნობი ტიპის პროექტის აგების ცივი უარი."
+
+#: src/bin/edi_main.c:828
+#, c-format
+msgid "%s of project <b>%s</b> in %s failed with status code %d.\n"
+msgstr "%s პროექტიდან <b>%s</b> %s-ში ავარიულად დასრულდა, კოდით: %d.\n"
+
+#: src/bin/edi_main.c:830
+#, c-format
+msgid "%s of project <b>%s</b> in %s was successful.\n"
+msgstr "%s პროექტიდან <b>%s</b> %s-დან წარმატებულია.\n"
+
+#: src/bin/edi_main.c:832
+#, c-format
+msgid "%s %s"
+msgstr "%s %s"
+
+#: src/bin/edi_main.c:832
+msgid "Failed"
+msgstr "ჩაიშალა"
+
+#: src/bin/edi_main.c:832
+msgid "Passed"
+msgstr "გაიარა"
+
+#: src/bin/edi_main.c:853 src/bin/edi_main.c:1353 src/bin/edi_main.c:1354
+#: src/bin/edi_main.c:1542
+msgid "Build"
+msgstr "აგება"
+
+#: src/bin/edi_main.c:867 src/bin/edi_main.c:1356 src/bin/edi_main.c:1544
+msgid "Clean"
+msgstr "გასუფთავება"
+
+#: src/bin/edi_main.c:881 src/bin/edi_main.c:1355 src/bin/edi_main.c:1543
+msgid "Test"
+msgstr "შემოწმება"
+
+#: src/bin/edi_main.c:1231
+msgid "Are you sure you wish to stash these changes?"
+msgstr ""
+
+#: src/bin/edi_main.c:1312
+msgid "File"
+msgstr "ფაილი"
+
+#: src/bin/edi_main.c:1313
+msgid "New Project"
+msgstr "ახალი პროექტი"
+
+#: src/bin/edi_main.c:1315
+msgid "New"
+msgstr "ახალი"
+
+#: src/bin/edi_main.c:1316
+msgid "New Directory"
+msgstr "ახალი საქაღალდე"
+
+#: src/bin/edi_main.c:1317 src/bin/edi_main.c:1515
+msgid "Save"
+msgstr "შენახვა"
+
+#: src/bin/edi_main.c:1319
+msgid "Close all"
+msgstr "ყველას დახურვა"
+
+#: src/bin/edi_main.c:1325
+msgid "Edit"
+msgstr "ჩასწორება"
+
+#: src/bin/edi_main.c:1326 src/bin/edi_main.c:1521
+msgid "Undo"
+msgstr "დაბრუნება"
+
+#: src/bin/edi_main.c:1327 src/bin/edi_main.c:1522
+msgid "Redo"
+msgstr "ბრძანების აღდგენა"
+
+#: src/bin/edi_main.c:1329 src/bin/edi_main.c:1527
+msgid "Cut"
+msgstr "ამოჭრა"
+
+#: src/bin/edi_main.c:1330 src/bin/edi_main.c:1528
+msgid "Copy"
+msgstr "კოპირება"
+
+#: src/bin/edi_main.c:1331 src/bin/edi_main.c:1529
+msgid "Paste"
+msgstr "ჩასმა"
+
+#: src/bin/edi_main.c:1333
+msgid "Find & Replace"
+msgstr "პოვნა და ჩანაცვლება"
+
+#: src/bin/edi_main.c:1335 src/bin/edi_main.c:1535
+msgid "Goto Line"
+msgstr "გადასვლა ხაზზე"
+
+#: src/bin/edi_main.c:1340
+msgid "Find in project"
+msgstr "პროექტში მოძებნა"
+
+#: src/bin/edi_main.c:1341
+msgid "Replace in project"
+msgstr "პროექტში ჩანაცვლება"
+
+#: src/bin/edi_main.c:1344
+msgid "View"
+msgstr "ნახვა"
+
+#: src/bin/edi_main.c:1345
+msgid "New Window"
+msgstr "ახალი ფანჯარა"
+
+#: src/bin/edi_main.c:1346
+msgid "New Panel"
+msgstr "ახალი პანელი"
+
+#: src/bin/edi_main.c:1347
+msgid "Split View"
+msgstr "ხედის გაყოფა"
+
+#: src/bin/edi_main.c:1352
+msgid "Open Tasks"
+msgstr "ამოცანების გახსა"
+
+#: src/bin/edi_main.c:1358 src/bin/edi_main.c:1546
+msgid "Run"
+msgstr "გაშვება"
+
+#: src/bin/edi_main.c:1359 src/bin/edi_main.c:1547
+msgid "Terminate"
+msgstr "შეწყვეტა"
+
+#: src/bin/edi_main.c:1361
+msgid "Debugger"
+msgstr "გამმართველი"
+
+#: src/bin/edi_main.c:1362
+msgid "Memcheck"
+msgstr "მეხსიერების შემოწმება"
+
+#: src/bin/edi_main.c:1365
+msgid "Init"
+msgstr "ერთეული"
+
+#: src/bin/edi_main.c:1366 src/bin/edi_scm_ui.c:887
+msgid "Commit"
+msgstr "გადაცემა"
+
+#: src/bin/edi_main.c:1367
+msgid "Stash"
+msgstr ""
+
+#: src/bin/edi_main.c:1369
+msgid "Status"
+msgstr "სტატუსი"
+
+#: src/bin/edi_main.c:1370
+msgid "Log"
+msgstr "ჟურნალი"
+
+#: src/bin/edi_main.c:1372
+msgid "Push"
+msgstr "გადაცემა"
+
+#: src/bin/edi_main.c:1373
+msgid "Pull"
+msgstr "მიღება"
+
+#: src/bin/edi_main.c:1376
+msgid "Help"
+msgstr "დახმარება"
+
+#: src/bin/edi_main.c:1377
+msgid "Documentation"
+msgstr "დოკუმენტაცია"
+
+#: src/bin/edi_main.c:1381 src/bin/edi_main.c:1555
+msgid "About"
+msgstr "შესახებ"
+
+#: src/bin/edi_main.c:1514
+msgid "New File"
+msgstr "ახალი ფაილი"
+
+#: src/bin/edi_main.c:1534
+msgid "Find"
+msgstr "მოძებნა"
+
+#: src/bin/edi_main.c:1585
+msgid "editor"
+msgstr "რედაქტორი"
+
+#: src/bin/edi_main.c:1587 src/bin/edi_scm_main.c:24
+msgid "unknown"
+msgstr "უცნობი"
+
+#: src/bin/edi_main.c:1592
+#, c-format
+msgid "Edi :: %s (%s)"
+msgstr "Edi :: %s (%s)"
+
+#: src/bin/edi_main.c:1608
+#, c-format
+msgid "%s - Edi"
+msgstr "%s - Edi"
+
+#: src/bin/edi_main.c:2042
+#, c-format
+msgid "Could not create file (%s) (%s)\n"
+msgstr "ფაილის შექმნის შეცდომა (%s) (%s)\n"
+
+#: src/bin/edi_main.c:2048
+#, c-format
+msgid "Could not open file (%s) (%s)\n"
+msgstr "ფაილის გახსნის შეცდომა (%s) (%s)\n"
+
+#: src/bin/edi_main.c:2056
+#, c-format
+msgid "Could not open file of unsupported mime type (%s)\n"
+msgstr "უცნობი mime-type-ის მქონე ფაილის გახსნა შეუძლებელია: %s\n"
+
+#: src/bin/edi_scm_main.c:22
+#, c-format
+msgid "Edi Source Control :: %s (%s)"
+msgstr "Edi კოდის კონტროლი :: %s (%s)"
+
+#: src/bin/edi_scm_main.c:92
+#, c-format
+msgid "Root path must be a directory\n"
+msgstr "საწყისი ბილიკი საქაღალდეს უნდა წარმოადგენდეს\n"
+
+#: src/bin/edi_scm_ui.c:151
+msgid "Please enter a valid commit message."
+msgstr "შეიყვანეთ კომიტის სწორი შეტყობინება."
+
+#: src/bin/edi_scm_ui.c:721
+msgid "User information"
+msgstr "ინფორმაცია მომხმარებელზე"
+
+#: src/bin/edi_scm_ui.c:764
+msgid "Unable to obtain user information."
+msgstr "მომხმარებლის ინფორმაციის მიღების შეცდომა."
+
+#: src/bin/edi_scm_ui.c:795
+msgid "Unstaged Changes"
+msgstr "რიგიდან მოცილებული ცვლილებები"
+
+#: src/bin/edi_scm_ui.c:813
+msgid "Staged Changes"
+msgstr "რიგში მყოფი ცვლილებები"
+
+#: src/bin/edi_scm_ui.c:824
+msgid "Commit message"
+msgstr "კომიტის შეტყობინება"
+
+#: src/bin/edi_scm_ui.c:828
+msgid "Enter commit summary<br><br>And change details<br>"
+msgstr "შეიყვანეთ კომიტის მიმოხილვა<br><br>და ცვლილების დეტალები<br>"
+
+#: src/bin/edi_scm_ui.c:844
+msgid "Source changes"
+msgstr "კოდის ცვლილებები"
+
+#: src/bin/edi_consolepanel.c:160
+#, c-format
+msgid "Total pass %d (%d%%), fail %d)"
+msgstr "სულ წარმატებული %d (%d%%), წარუმატებელი %d)"

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=@VERSION@
+Type=Application
+Name=EDI
+Name[fr]=EDI
+GenericName=EFL IDE
+Comment=EFL IDE
+Icon=@PACKAGE_NAME@
+TryExec=@PACKAGE_NAME@
+Exec=@PACKAGE_NAME@
+Categories=Development;Utility;
+MimeType=text/plain;

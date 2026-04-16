@@ -1,0 +1,63 @@
+data {
+    item: "title" "Black on White";
+}
+
+collections {
+/* simple layout to pack our scrolling content into an elm_layout */
+group { name: "elm/code/layout/default";
+   data {
+      item: "font.name" "Mono";
+      item: "font.size" "10";
+   }
+   parts {
+      part { name: "elm.swallow.content"; type: SWALLOW;
+         description { state: "default" 0.0;
+            align: 0.5 0.0;
+            fixed: 0 1;
+
+            rel2 {
+               relative: 1.0 1.0;
+               offset: 0 0;
+            }
+         }
+      }
+   }
+}
+
+color_classes {
+    color_class { name: "/fg/normal/text"; color: 21 21 21 255; }
+    color_class { name: "/fg/normal/text-code"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-comment"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-string"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-number"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-brace"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-type"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-class"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-function"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-param"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-keyword"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-preprocessor"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-line-added"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-line-removed"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-line-changed"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-status"; color: 255 255 255 255; }
+    color_class { name: "/fg/normal/text-match"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-current"; color: 211 211 211 255; }
+    color_class { name: "/fg/normal/text-ignored"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-note"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-warning"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-error"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-fatal"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-success"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-failure"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-todo"; color: 0 0 0 255; }
+    color_class { name: "/fg/normal/text-gutter"; color: 21 21 21 255; }
+
+    color_class { name: "/bg/normal"; color: 211 211 211 255; }
+    color_class { name: "/bg/normal/text"; color: 211 211 211 255; }
+    color_class { name: "/bg/normal/text-selection"; color: 169 169 169 255; }
+    color_class { name: "/bg/normal/text-gutter"; color: 211 211 211 255; }
+    color_class { name: "/bg/normal/text-scope"; color: 255 255 255 255; }
+    color_class { name: "/bg/normal/text-whitespace"; color: 255 255 255 255; }
+}
+}

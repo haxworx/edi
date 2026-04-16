@@ -1,0 +1,51 @@
+.TH EDI 1 "04 06 2015" "@PACKAGE_NAME@ @PACKAGE_VERSION@"
+
+.SH NAME
+edi \- the Enlightened IDE
+
+.SH SYNOPSIS
+.B edi
+[-L] [-C] [-V] [-h]
+.B [project-dir]
+
+.SH DESCRIPTION
+
+Edi is an integrated development environment based on the EFL.
+
+With no option, the program starts and displays a project picker screen.
+If you launch with a project directory parameter it will open directly to
+that project.
+
+
+.SH OPTIONS
+
+.TP
+.B -L, --license
+Show license.
+
+.TP
+.B -C, --copyright
+Show copyright.
+
+.TP
+.B -V, --version
+Show program version.
+
+.TP
+.B -h, --help
+Print list of options with short description.
+
+
+.SH BUGS
+
+Reports are welcome. Send them at @PACKAGE_BUGREPORT@.
+
+
+.SH HOMEPAGE
+
+http://edi-ide.com
+
+
+.SH AUTHORS
+
+Andy Williams <andy@andyilliams.me> and various contributors.

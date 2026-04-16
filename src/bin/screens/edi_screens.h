@@ -1,0 +1,166 @@
+#ifndef EDI_WELCOME_H_
+# define EDI_WELCOME_H_
+
+#include <Elementary.h>
+
+#include "Edi.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @file
+ * @brief These routines control the intro wizard and other supporting UI for Edi.
+ */
+
+/**
+ * @brief UI management functions.
+ * @defgroup UI Initialisation and management of the supporting Edi screens
+ *
+ * @{
+ *
+ */
+
+typedef enum _Edi_Settings_Tab
+{
+   EDI_SETTINGS_TAB_DISPLAY = 0,
+   EDI_SETTINGS_TAB_PROJECT = 1,
+   EDI_SETTINGS_TAB_BUILDS = 2,
+   EDI_SETTINGS_TAB_BEHAVIOUR = 3,
+} Edi_Settings_Tab;
+
+/**
+ * Initialise a new Edi welcome window and display it.
+ *
+ * @return The welcome window that is created
+ *
+ * @ingroup UI
+ */
+Evas_Object *edi_welcome_show();
+
+/**
+ * Initialise a new Edi welcome screen and open it on the create project panel.
+ *
+ * @return The welcome screen window that is created
+ *
+ * @ingroup UI
+ */
+Evas_Object *edi_welcome_create_show();
+
+/**
+ * Initialise a new Edi about window and display it.
+ *
+ * @return The about window that is created
+ *
+ * @ingroup UI
+ */
+Evas_Object *edi_about_show(Evas_Object *mainwin);
+
+/**
+ * Initialise a new Edi settings window and display it.
+ *
+ * @return The settings window that is created
+ *
+ * @ingroup UI
+ */
+Evas_Object *edi_settings_show(Evas_Object *mainwin, Edi_Settings_Tab type);
+
+/**
+ * Return a pointer to the settings window.
+ *
+ * @return The object if it exists or NULL if not.
+ *
+ * @ingroup UI
+ */
+Evas_Object *edi_settings_win_get(void);
+
+/**
+ * Create the font selection settings widget.
+ *
+ * @param parent The parent object for the font selection widget.
+ *
+ * @ingroup UI
+ */
+void edi_settings_font_add(Evas_Object *parent);
+
+/**
+ * Create a a confirmation dialogue and add it to the parent obj.
+ *
+ * @param parent The parent object to display the dialogue in.
+ * @param message The generic message to display in the dialogue.
+ * @param confirm_cb Function to execute upon confirmation.
+ * @param data Data to pass to the confirm_cb callback.
+ *
+ * @ingroup UI
+ */
+void edi_screens_message_confirm(Evas_Object *parent, const char *message, void ((*confirm_cb)(void *)), void *data);
+
+/**
+ * Create an information dialogue and add it to the parent obj.
+ *
+ * @param parent The parent object to display the dialogue in.
+ * @param title The title for the popup.
+ * @param message The text to be displayed in the popup.
+ *
+ * @ingroup UI
+ */
+void edi_screens_message(Evas_Object *parent, const char *title, const char *message);
+
+/**
+ * Create an information dialogue with a custom icon and add it to the parent obj.
+ *
+ * @param parent The parent object to display the dialogue in.
+ * @param title The title for the popup.
+ * @param message The text to be displayed in the popup.
+ * @param icon_name Freedesktop icon name to use.
+ *
+ * @ingroup UI
+ */
+void edi_screens_message_icon(Evas_Object *parent, const char *title, const char *message,
+                              const char *icon_name);
+
+
+/**
+ * Create an information dialogue with additional button to settings.
+ *
+ * @param parent The parent object to display the dialogue in.
+ * @param type The type of tab to be opened in the settings window.
+ * @param title The title for the popup.
+ * @param message The text to be displayed in the popup.
+ *
+ * @ingroup UI
+ */
+void edi_screens_settings_message(Evas_Object *parent, Edi_Settings_Tab type, const char *title, const char *message);
+
+/**
+ * Send a desktop notification message to the window manager.
+ *
+ * @param parent The parent object where notification will be displayed.
+ * @param title The title for the notification.
+ * @param message The text to be displayed in the desktop notification.
+ * @param status Status code, where 0 indicates success and non-zero failure.
+ *
+ * @ingroup UI
+ */
+void edi_screens_desktop_notify(Evas_Object *parent, const char *title, const char *message, int status);
+
+/**
+ * SCM binary is not installed, show dialogue.
+ *
+ * @param parent The object into which the UI will load.
+ * @param binary The name of the missing binary.
+ *
+ * @ingroup Scm
+ */
+void edi_screens_scm_binary_missing(Evas_Object *parent, const char *binary);
+
+/**
+ * @}
+ */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* EDI_SCREENS_H_ */

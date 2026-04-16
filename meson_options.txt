@@ -1,0 +1,4 @@
+option('libclang', type : 'boolean', value : true, description : 'Whether to have libclang support for autocomplete and inline errors')
+option('bear', type : 'boolean', value : true, description : 'Whether to enable build command caching with bear')
+option('libclang-libdir', type : 'string', value : '', description : 'Specify a none default location for your clang installation')
+option('libclang-headerdir', type : 'string', value : '', description : 'Specify a none default location for your clang installation')
