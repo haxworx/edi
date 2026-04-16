@@ -41,7 +41,7 @@
    ((EDI_CONFIG_FILE_EPOCH << 16) | EDI_CONFIG_FILE_GENERATION)
 
 #  define EDI_PROJECT_CONFIG_FILE_EPOCH 0x0002
-#  define EDI_PROJECT_CONFIG_FILE_GENERATION 0x000a
+#  define EDI_PROJECT_CONFIG_FILE_GENERATION 0x000b
 #  define EDI_PROJECT_CONFIG_FILE_VERSION \
    ((EDI_PROJECT_CONFIG_FILE_EPOCH << 16) | EDI_PROJECT_CONFIG_FILE_GENERATION)
 
@@ -314,6 +314,7 @@ _edi_config_init(void)
    EDI_CONFIG_VAL(D, T, agent.api_key, EET_T_STRING);
    EDI_CONFIG_VAL(D, T, agent.project_id, EET_T_STRING);
    EDI_CONFIG_VAL(D, T, agent.timeout_seconds, EET_T_DOUBLE);
+   EDI_CONFIG_VAL(D, T, agent.steps_max, EET_T_INT);
 
    EDI_CONFIG_LIST(D, T, panels, _edi_proj_cfg_panel_edd);
    EDI_CONFIG_LIST(D, T, windows, _edi_proj_cfg_tab_edd);
@@ -591,6 +592,10 @@ _edi_project_config_load()
    _edi_project_config->agent.edits_enabled = EINA_FALSE;
    IFPCFGEND;
 
+   IFPCFG(0x000b);
+   _edi_project_config->agent.steps_max = 256;
+   IFPCFGEND;
+
    /* limit config values so they are sane */
    EDI_CONFIG_LIMIT(_edi_project_config->font.size, EDI_FONT_MIN, EDI_FONT_MAX);
    EDI_CONFIG_LIMIT(_edi_project_config->gui.width, 150, 10000);
@@ -598,6 +603,7 @@ _edi_project_config_load()
    EDI_CONFIG_LIMIT(_edi_project_config->gui.leftsize, 0.0, 1.0);
    EDI_CONFIG_LIMIT(_edi_project_config->gui.bottomsize, 0.0, 1.0);
    EDI_CONFIG_LIMIT(_edi_project_config->gui.tabstop, 1, 32);
+   EDI_CONFIG_LIMIT(_edi_project_config->agent.steps_max, 1, 4096);
 
    _edi_project_config->version = EDI_PROJECT_CONFIG_FILE_VERSION;
 

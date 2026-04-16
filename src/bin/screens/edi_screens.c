@@ -11,6 +11,21 @@
 
 static Evas_Object *_edi_screens_popup = NULL;
 
+static void
+_edi_screens_popup_compact_size_apply(Evas_Object *popup)
+{
+   double scale;
+
+   if (!popup)
+     return;
+
+   scale = elm_config_scale_get();
+   evas_object_size_hint_min_set(popup, 380 * scale, 120 * scale);
+   evas_object_size_hint_max_set(popup, 640 * scale, 420 * scale);
+   evas_object_size_hint_weight_set(popup, 0.0, 0.0);
+   evas_object_size_hint_align_set(popup, 0.5, 0.5);
+}
+
 static char *
 _edi_screens_message_markup_build(const char *message)
 {
@@ -47,9 +62,9 @@ _edi_screens_message_label_add(Evas_Object *parent, const char *message)
 
    label = elm_label_add(parent);
    elm_label_line_wrap_set(label, ELM_WRAP_MIXED);
-   elm_label_wrap_width_set(label, 520 * elm_config_scale_get());
-   evas_object_size_hint_weight_set(label, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-   evas_object_size_hint_align_set(label, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_label_wrap_width_set(label, 420 * elm_config_scale_get());
+   evas_object_size_hint_weight_set(label, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(label, EVAS_HINT_FILL, 0.0);
    markup = _edi_screens_message_markup_build(message);
    elm_object_text_set(label, markup);
    free(markup);
@@ -150,37 +165,46 @@ _edi_screens_message_copy_cb(void *data, Evas_Object *obj EINA_UNUSED,
 
 void edi_screens_message_confirm(Evas_Object *parent, const char *message, void ((*confirm_cb)(void *)), void *data)
 {
-   Evas_Object *popup, *frame, *table, *label, *button, *icon, *box, *sep;
+   Evas_Object *popup, *table, *label, *button, *icon, *box, *sep;
+   double scale;
 
    _edi_screens_popup = popup = elm_popup_add(parent);
    elm_object_part_text_set(popup, "title,text", _("Confirmation required"));
+   scale = elm_config_scale_get();
+   evas_object_size_hint_min_set(popup, 320 * scale, 110 * scale);
+   evas_object_size_hint_max_set(popup, 520 * scale, 300 * scale);
+   evas_object_size_hint_weight_set(popup, 0.0, 0.0);
+   evas_object_size_hint_align_set(popup, 0.5, 0.5);
 
    table = elm_table_add(popup);
+   elm_table_padding_set(table, 10 * scale, 10 * scale);
 
    icon = elm_icon_add(table);
    elm_icon_standard_set(icon, "dialog-question");
-   evas_object_size_hint_min_set(icon, 48 * elm_config_scale_get(), 48 * elm_config_scale_get());
+   evas_object_size_hint_min_set(icon, 48 * scale, 48 * scale);
    evas_object_size_hint_weight_set(icon, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(icon, EVAS_HINT_FILL, EVAS_HINT_FILL);
    evas_object_show(icon);
    elm_table_pack(table, icon, 0, 0, 1, 1);
 
    label = _edi_screens_message_label_add(table, message);
+   elm_label_wrap_width_set(label, 320 * scale);
 
    elm_table_pack(table, label, 1, 0, 1, 1);
    evas_object_show(table);
 
    box = elm_box_add(popup);
+   sep = elm_separator_add(box);
+   elm_separator_horizontal_set(sep, EINA_TRUE);
+   evas_object_show(sep);
+   elm_box_pack_end(box, sep);
    elm_box_pack_end(box, table);
    sep = elm_separator_add(box);
    elm_separator_horizontal_set(sep, EINA_TRUE);
    evas_object_show(sep);
    elm_box_pack_end(box, sep);
-
-   frame = elm_frame_add(popup);
-   evas_object_show(frame);
-   elm_object_content_set(frame, box);
-   elm_object_content_set(popup, frame);
+   evas_object_show(box);
+   elm_object_content_set(popup, box);
 
    button = elm_button_add(popup);
    elm_object_text_set(button, _("Yes"));
@@ -196,14 +220,15 @@ void edi_screens_message_confirm(Evas_Object *parent, const char *message, void 
    evas_object_show(popup);
 }
 
-void edi_screens_message_icon(Evas_Object *parent, const char *title, const char *message,
-                              const char *icon_name)
+void edi_screens_message_icon_with_copy(Evas_Object *parent, const char *title, const char *message,
+                                        const char *icon_name, Eina_Bool copy_enabled)
 {
    Evas_Object *popup, *table, *box, *icon, *sep, *label, *button;
    char *copy_message;
 
    popup = elm_popup_add(parent);
    elm_object_part_text_set(popup, "title,text", title);
+   _edi_screens_popup_compact_size_apply(popup);
 
    table = elm_table_add(popup);
    icon = elm_icon_add(table);
@@ -241,12 +266,19 @@ void edi_screens_message_icon(Evas_Object *parent, const char *title, const char
       {
          evas_object_data_set(popup, "copy_message", copy_message);
          button = elm_button_add(popup);
-         elm_object_text_set(button, _("Copy Error"));
+         elm_object_text_set(button, _("Copy Text"));
          elm_object_part_content_set(popup, "button2", button);
+         elm_object_disabled_set(button, !copy_enabled);
          evas_object_smart_callback_add(button, "clicked", _edi_screens_message_copy_cb, popup);
       }
 
    evas_object_show(popup);
+}
+
+void edi_screens_message_icon(Evas_Object *parent, const char *title, const char *message,
+                              const char *icon_name)
+{
+   edi_screens_message_icon_with_copy(parent, title, message, icon_name, EINA_TRUE);
 }
 
 void edi_screens_message(Evas_Object *parent, const char *title, const char *message)
@@ -275,6 +307,7 @@ void edi_screens_settings_message(Evas_Object *parent, Edi_Settings_Tab type, co
 
    popup = elm_popup_add(parent);
    elm_object_part_text_set(popup, "title,text", title);
+   _edi_screens_popup_compact_size_apply(popup);
 
    table = elm_table_add(popup);
    elm_table_padding_set(table, 10, 10);

@@ -1,0 +1,39 @@
+Resume the previous staged task.
+If another command is needed, reply only with {{RUN_OPEN}}COMMAND{{RUN_CLOSE}}.
+Do not restart from scratch.
+
+Commands execute via /bin/sh -lc; use POSIX sh syntax and quote paths/arguments safely.
+If using > or >>, use repo-relative file paths only (no absolute paths, no '..', no descriptor targets).
+Do not use multiple redirections in one command.
+Safety policy (mandatory):
+- Continue with minimal, targeted changes.
+- Prefer patch-style edits for existing files; avoid unnecessary rewrites.
+- Verify target paths/types before editing or creating.
+- Validate each write with explicit checks and output review.
+- If checks fail, correct them before proceeding.
+Task breakdown policy (mandatory):
+- Continue in small, single-purpose commands.
+- Do one redirection write step at a time and verify before the next step.
+- Avoid combining multiple write targets or risky shell chaining in one command.
+- Prefer inspect/read commands before mutate/write commands.
+- If verification fails, stop and fix before continuing.
+MANDATORY file-creation sequence: mkdir -p parent dir, then cat <<'EOF' > path, then test -f path. Do not continue until test -f passes. Never use touch/tee/echo/printf for initial creation.
+
+Original user request:
+{{ORIGINAL_USER_REQUEST}}
+
+Last completed stage: {{LAST_STAGE_INDEX}}
+
+Last command:
+{{LAST_COMMAND}}
+
+Last exit code: {{LAST_EXIT_CODE}}
+
+Last command output:
+{{LAST_COMMAND_OUTPUT}}
+
+Updated state:
+{{STATE}}
+
+Resume request:
+{{RESUME_REQUEST}}

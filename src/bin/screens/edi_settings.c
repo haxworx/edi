@@ -1013,6 +1013,14 @@ _edi_settings_project_agent_timeout_cb(void *data EINA_UNUSED, Evas_Object *obj,
 }
 
 static void
+_edi_settings_project_agent_steps_max_cb(void *data EINA_UNUSED, Evas_Object *obj,
+                                         void *event EINA_UNUSED)
+{
+   _edi_project_config->agent.steps_max = (int) elm_spinner_value_get(obj);
+   _edi_project_config_save();
+}
+
+static void
 _edi_settings_project_agent_test_done_cb(const char *response, const char *error, void *data)
 {
    Evas_Object *button = data;
@@ -1021,11 +1029,12 @@ _edi_settings_project_agent_test_done_cb(const char *response, const char *error
      elm_object_disabled_set(button, EINA_FALSE);
 
    if (error && error[0])
-     edi_screens_message(_edi_settings_win, _("AI Agent Test Failed"), error);
+     edi_screens_message_icon_with_copy(_edi_settings_win, _("AI Agent Test Failed"), error,
+                                        "dialog-information", EINA_TRUE);
    else
-     edi_screens_message_icon(_edi_settings_win, _("AI Agent Test OK"),
-                              (response && response[0]) ? response : _("Agent replied successfully."),
-                              "emblem-default");
+     edi_screens_message_icon_with_copy(_edi_settings_win, _("AI Agent Test OK"),
+                                        (response && response[0]) ? response : _("Agent replied successfully."),
+                                        "emblem-default", EINA_FALSE);
 }
 
 static void
@@ -1150,6 +1159,7 @@ _edi_settings_project_create(Evas_Object *parent)
 {
    Edi_Scm_Engine *engine = NULL;
    Evas_Object *box, *frames, *frame, *table, *label, *entry_name, *entry_email;
+   Evas_Object *spacer;
    Evas_Object *scroller;
    Evas_Object *entry_remote, *entry, *check, *combobox, *spinner, *button;
    Evas_Object *combobox_model, *entry_endpoint;
@@ -1178,30 +1188,49 @@ _edi_settings_project_create(Evas_Object *parent)
    evas_object_size_hint_align_set(frames, EVAS_HINT_FILL, EVAS_HINT_FILL);
    evas_object_show(frames);
    frame = _edi_settings_panel_create(frames, _("Project Settings"));
+   evas_object_size_hint_weight_set(frame, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(frame, EVAS_HINT_FILL, EVAS_HINT_FILL);
    elm_box_pack_end(frames, frame);
    box = elm_object_part_content_get(frame, "default");
+   evas_object_size_hint_weight_set(box, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(box, EVAS_HINT_FILL, EVAS_HINT_FILL);
 
    table = elm_table_add(parent);
-   evas_object_size_hint_weight_set(table, EVAS_HINT_EXPAND, 0.5);
+   evas_object_size_hint_weight_set(table, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(table, EVAS_HINT_FILL, EVAS_HINT_FILL);
    elm_table_padding_set(table, EDI_SETTINGS_TABLE_PADDING, EDI_SETTINGS_TABLE_PADDING);
    elm_box_pack_end(box, table);
    evas_object_show(table);
 
    label = elm_label_add(table);
-   elm_object_text_set(label, _("Author Name"));
+   elm_object_text_set(label, _("Project ID (Google only)"));
+   evas_object_color_set(label, 0, 0, 0, 0);
    evas_object_size_hint_weight_set(label, 0.0, 0.0);
    evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
    elm_table_pack(table, label, 0, 0, 1, 1);
+   evas_object_show(label);
+
+   spacer = evas_object_rectangle_add(evas_object_evas_get(table));
+   evas_object_color_set(spacer, 0, 0, 0, 0);
+   evas_object_size_hint_weight_set(spacer, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(spacer, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_table_pack(table, spacer, 1, 0, 1, 1);
+   evas_object_show(spacer);
+
+   label = elm_label_add(table);
+   elm_object_text_set(label, _("Author Name"));
+   evas_object_size_hint_weight_set(label, 0.0, 0.0);
+   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
+   elm_table_pack(table, label, 0, 1, 1, 1);
    evas_object_show(label);
 
    entry_name = elm_entry_add(table);
    elm_object_text_set(entry_name, _edi_project_config->user_fullname ?: remote_name);
    elm_entry_single_line_set(entry_name, EINA_TRUE);
    elm_entry_scrollable_set(entry_name, EINA_TRUE);
-   evas_object_size_hint_weight_set(entry_name, 0.75, 0.0);
+   evas_object_size_hint_weight_set(entry_name, EVAS_HINT_EXPAND, 0.0);
    evas_object_size_hint_align_set(entry_name, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_table_pack(table, entry_name, 1, 0, 1, 1);
+   elm_table_pack(table, entry_name, 1, 1, 1, 1);
    evas_object_show(entry_name);
    evas_object_smart_callback_add(entry_name, "changed",
                                   _edi_settings_project_name_cb, NULL);
@@ -1210,16 +1239,16 @@ _edi_settings_project_create(Evas_Object *parent)
    elm_object_text_set(label, _("Author E-mail"));
    evas_object_size_hint_weight_set(label, 0.0, 0.0);
    evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
-   elm_table_pack(table, label, 0, 1, 1, 1);
+   elm_table_pack(table, label, 0, 2, 1, 1);
    evas_object_show(label);
 
    entry_email = elm_entry_add(table);
    elm_object_text_set(entry_email, _edi_project_config->user_email ?: remote_email);
    elm_entry_single_line_set(entry_email, EINA_TRUE);
    elm_entry_scrollable_set(entry_email, EINA_TRUE);
-   evas_object_size_hint_weight_set(entry_email, 0.75, 0.0);
+   evas_object_size_hint_weight_set(entry_email, EVAS_HINT_EXPAND, 0.0);
    evas_object_size_hint_align_set(entry_email, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_table_pack(table, entry_email, 1, 1, 1, 1);
+   elm_table_pack(table, entry_email, 1, 2, 1, 1);
    evas_object_show(entry_email);
    evas_object_smart_callback_add(entry_email, "changed",
                                   _edi_settings_project_email_cb, NULL);
@@ -1231,22 +1260,41 @@ _edi_settings_project_create(Evas_Object *parent)
         eina_strbuf_append_printf(text, " (%s)", engine->name);
 
         frame = _edi_settings_panel_create(frames, eina_strbuf_string_get(text));
+        evas_object_size_hint_weight_set(frame, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+        evas_object_size_hint_align_set(frame, EVAS_HINT_FILL, EVAS_HINT_FILL);
         eina_strbuf_free(text);
         elm_box_pack_end(frames, frame);
         box = elm_object_part_content_get(frame, "default");
+        evas_object_size_hint_weight_set(box, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+        evas_object_size_hint_align_set(box, EVAS_HINT_FILL, EVAS_HINT_FILL);
 
         table = elm_table_add(parent);
-        evas_object_size_hint_weight_set(table, EVAS_HINT_EXPAND, 0.5);
+        evas_object_size_hint_weight_set(table, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
         evas_object_size_hint_align_set(table, EVAS_HINT_FILL, EVAS_HINT_FILL);
         elm_table_padding_set(table, EDI_SETTINGS_TABLE_PADDING, EDI_SETTINGS_TABLE_PADDING);
         elm_box_pack_end(box, table);
         evas_object_show(table);
 
         label = elm_label_add(table);
-        elm_object_text_set(label, _("Remote URL"));
+        elm_object_text_set(label, _("Project ID (Google only)"));
+        evas_object_color_set(label, 0, 0, 0, 0);
         evas_object_size_hint_weight_set(label, 0.0, 0.0);
         evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
         elm_table_pack(table, label, 0, 0, 1, 1);
+        evas_object_show(label);
+
+        spacer = evas_object_rectangle_add(evas_object_evas_get(table));
+        evas_object_color_set(spacer, 0, 0, 0, 0);
+        evas_object_size_hint_weight_set(spacer, EVAS_HINT_EXPAND, 0.0);
+        evas_object_size_hint_align_set(spacer, EVAS_HINT_FILL, EVAS_HINT_FILL);
+        elm_table_pack(table, spacer, 1, 0, 1, 1);
+        evas_object_show(spacer);
+
+        label = elm_label_add(table);
+        elm_object_text_set(label, _("Remote URL"));
+        evas_object_size_hint_weight_set(label, 0.0, 0.0);
+        evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
+        elm_table_pack(table, label, 0, 1, 1, 1);
         evas_object_show(label);
 
         entry_remote = elm_entry_add(table);
@@ -1254,9 +1302,9 @@ _edi_settings_project_create(Evas_Object *parent)
         elm_entry_single_line_set(entry_remote, EINA_TRUE);
         elm_entry_scrollable_set(entry_remote, EINA_TRUE);
         elm_object_disabled_set(entry_remote, edi_scm_remote_enabled());
-        evas_object_size_hint_weight_set(entry_remote, 0.75, 0.0);
+        evas_object_size_hint_weight_set(entry_remote, EVAS_HINT_EXPAND, 0.0);
         evas_object_size_hint_align_set(entry_remote, EVAS_HINT_FILL, EVAS_HINT_FILL);
-        elm_table_pack(table, entry_remote, 1, 0, 1, 1);
+        elm_table_pack(table, entry_remote, 1, 1, 1, 1);
         evas_object_show(entry_remote);
         evas_object_smart_callback_add(entry_remote, "changed",
                                        _edi_settings_project_remote_cb, NULL);
@@ -1432,11 +1480,32 @@ _edi_settings_project_create(Evas_Object *parent)
    evas_object_smart_callback_add(spinner, "changed",
                                   _edi_settings_project_agent_timeout_cb, NULL);
 
+   label = elm_label_add(table);
+   elm_object_text_set(label, _("Max AI edit steps"));
+   evas_object_size_hint_weight_set(label, 0.0, 0.0);
+   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
+   elm_table_pack(table, label, 0, 7, 1, 1);
+   evas_object_show(label);
+
+   spinner = elm_spinner_add(table);
+   elm_spinner_min_max_set(spinner, 1.0, 4096.0);
+   elm_spinner_step_set(spinner, 1.0);
+   elm_spinner_editable_set(spinner, EINA_TRUE);
+   elm_spinner_wrap_set(spinner, EINA_FALSE);
+   elm_spinner_value_set(spinner, _edi_project_config->agent.steps_max > 0 ?
+                                  _edi_project_config->agent.steps_max : 256);
+   evas_object_size_hint_weight_set(spinner, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(spinner, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_table_pack(table, spinner, 1, 7, 1, 1);
+   evas_object_show(spinner);
+   evas_object_smart_callback_add(spinner, "changed",
+                                  _edi_settings_project_agent_steps_max_cb, NULL);
+
    button = elm_button_add(table);
    elm_object_text_set(button, _("Test Connection"));
    evas_object_size_hint_weight_set(button, EVAS_HINT_EXPAND, 0.0);
    evas_object_size_hint_align_set(button, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_table_pack(table, button, 1, 7, 1, 1);
+   elm_table_pack(table, button, 1, 8, 1, 1);
    evas_object_show(button);
    evas_object_smart_callback_add(button, "clicked",
                                   _edi_settings_project_agent_test_cb, button);
@@ -1636,7 +1705,7 @@ edi_settings_show(Evas_Object *mainwin, Edi_Settings_Tab type)
      }
 
    evas_object_show(naviframe);
-   evas_object_resize(win, 480 * elm_config_scale_get(), 360 * elm_config_scale_get());
+   evas_object_resize(win, 581 * elm_config_scale_get(), 436 * elm_config_scale_get());
    evas_object_show(win);
 
    return win;

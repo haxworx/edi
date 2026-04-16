@@ -111,6 +111,7 @@ struct _Edi_Project_Config
         Eina_Stringshare *api_key;
         Eina_Stringshare *project_id;
         double timeout_seconds;
+        int steps_max;
      } agent;
 
    Eina_List *panels;

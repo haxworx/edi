@@ -1555,6 +1555,7 @@ edi_mainview_panel_add(Evas_Object *parent)
 {
    Edi_Mainview_Panel *panel;
    Evas_Object *box, *sep, *scroll, *txt, *nf, *tabs, *tab, *bg, *pad, *scr, *tb;
+   Evas_Object *content_bg, *content_wrap;
    Evas_Object *next, *prev, *ico_next, *ico_prev;
    _main_win = parent;
 
@@ -1644,10 +1645,22 @@ edi_mainview_panel_add(Evas_Object *parent)
    panel->box = box;
    panel->tb = tb;
 
-   nf = elm_box_add(parent);
+   content_wrap = elm_table_add(parent);
+   evas_object_size_hint_weight_set(content_wrap, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(content_wrap, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_box_pack_end(box, content_wrap);
+   evas_object_show(content_wrap);
+
+   content_bg = elm_bg_add(content_wrap);
+   evas_object_size_hint_weight_set(content_bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(content_bg, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_table_pack(content_wrap, content_bg, 0, 0, 1, 1);
+   evas_object_show(content_bg);
+
+   nf = elm_box_add(content_wrap);
    evas_object_size_hint_weight_set(nf, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(nf, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_box_pack_end(box, nf);
+   elm_table_pack(content_wrap, nf, 0, 0, 1, 1);
    evas_object_show(nf);
    panel->content = nf;
 
@@ -1663,7 +1676,7 @@ edi_mainview_panel_add(Evas_Object *parent)
    evas_object_show(box);
 
    txt = elm_label_add(scroll);
-   elm_object_text_set(txt, "<hilight>Welcome to EDI</hilight><br><br>Click on any file to edit.");
+   elm_object_text_set(txt, "<b>Welcome to EDI</b><br><br>Click on any file to edit.");
    evas_object_size_hint_weight_set(txt, EVAS_HINT_EXPAND, 0.0);
    evas_object_size_hint_align_set(txt, EVAS_HINT_FILL, EVAS_HINT_FILL);
    elm_object_focus_allow_set(txt, EINA_FALSE);

@@ -120,6 +120,20 @@ void edi_screens_message(Evas_Object *parent, const char *title, const char *mes
 void edi_screens_message_icon(Evas_Object *parent, const char *title, const char *message,
                               const char *icon_name);
 
+/**
+ * Create an information dialogue with a custom icon and controllable copy button state.
+ *
+ * @param parent The parent object to display the dialogue in.
+ * @param title The title for the popup.
+ * @param message The text to be displayed in the popup.
+ * @param icon_name Freedesktop icon name to use.
+ * @param copy_enabled Whether the Copy Text button should be enabled.
+ *
+ * @ingroup UI
+ */
+void edi_screens_message_icon_with_copy(Evas_Object *parent, const char *title, const char *message,
+                                        const char *icon_name, Eina_Bool copy_enabled);
+
 
 /**
  * Create an information dialogue with additional button to settings.

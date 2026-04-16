@@ -66,46 +66,54 @@ _edi_editor_file_change_ignore_cb(void *data, Evas_Object *obj EINA_UNUSED, void
 static void
 _edi_editor_file_save_fail_popup(Evas_Object *parent, Edi_Editor *editor)
 {
-   Evas_Object *table, *frame, *box, *label, *sep, *icon, *button;
+   Evas_Object *table, *box, *label, *sep, *icon, *button;
+   double scale;
 
    if (editor->popup)
      return;
 
    editor->popup = elm_popup_add(parent);
    elm_popup_orient_set(editor->popup, ELM_POPUP_ORIENT_CENTER);
-   elm_popup_scrollable_set(editor->popup, EINA_TRUE);
+   elm_popup_scrollable_set(editor->popup, EINA_FALSE);
    elm_object_part_text_set(editor->popup, "title,text", _("Permission Denied"));
-   evas_object_size_hint_align_set(editor->popup, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   evas_object_size_hint_weight_set(editor->popup, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   scale = elm_config_scale_get();
+   evas_object_size_hint_min_set(editor->popup, 320 * scale, 110 * scale);
+   evas_object_size_hint_max_set(editor->popup, 520 * scale, 300 * scale);
+   evas_object_size_hint_align_set(editor->popup, 0.5, 0.5);
+   evas_object_size_hint_weight_set(editor->popup, 0.0, 0.0);
 
    table = elm_table_add(editor->popup);
+   elm_table_padding_set(table, 10 * scale, 10 * scale);
    icon = elm_icon_add(table);
    elm_icon_standard_set(icon, "dialog-warning");
-   evas_object_size_hint_min_set(icon, 48 * elm_config_scale_get(), 48 * elm_config_scale_get());
+   evas_object_size_hint_min_set(icon, 48 * scale, 48 * scale);
    evas_object_size_hint_weight_set(icon, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(icon, EVAS_HINT_FILL, EVAS_HINT_FILL);
    evas_object_show(icon);
    elm_table_pack(table, icon, 0, 0, 1, 1);
 
-   frame = elm_frame_add(editor->popup);
-   elm_object_content_set(frame, table);
-   evas_object_show(frame);
-
    box = elm_box_add(editor->popup);
+   sep = elm_separator_add(box);
+   elm_separator_horizontal_set(sep, EINA_TRUE);
+   evas_object_show(sep);
+   elm_box_pack_end(box, sep);
+   elm_box_pack_end(box, table);
    label = elm_label_add(editor->popup);
+   elm_label_line_wrap_set(label, ELM_WRAP_MIXED);
+   elm_label_wrap_width_set(label, 320 * scale);
+   evas_object_size_hint_weight_set(label, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(label, EVAS_HINT_FILL, 0.0);
    elm_object_text_set(label, _("Unable to save file. Would you like to reload <br> the contents of this file?"));
    evas_object_show(label);
-   elm_box_pack_end(box, label);
+   elm_table_pack(table, label, 1, 0, 1, 1);
+   evas_object_show(table);
 
    sep = elm_separator_add(box);
    elm_separator_horizontal_set(sep, EINA_TRUE);
    evas_object_show(sep);
    elm_box_pack_end(box, sep);
    evas_object_show(box);
-   elm_table_pack(table, box, 1, 0, 1, 1);
-
-   elm_object_content_set(editor->popup, frame);
-   evas_object_show(table);
+   elm_object_content_set(editor->popup, box);
 
    button = elm_button_add(editor->popup);
    elm_object_text_set(button, _("Reload"));
@@ -124,46 +132,54 @@ _edi_editor_file_save_fail_popup(Evas_Object *parent, Edi_Editor *editor)
 static void
 _edi_editor_file_change_popup(Evas_Object *parent, Edi_Editor *editor)
 {
-   Evas_Object *table, *frame, *box, *label, *sep, *icon, *button;
+   Evas_Object *table, *box, *label, *sep, *icon, *button;
+   double scale;
 
    if (editor->popup)
      return;
 
    editor->popup = elm_popup_add(parent);
    elm_popup_orient_set(editor->popup, ELM_POPUP_ORIENT_CENTER);
-   elm_popup_scrollable_set(editor->popup, EINA_TRUE);
+   elm_popup_scrollable_set(editor->popup, EINA_FALSE);
    elm_object_part_text_set(editor->popup, "title,text", _("Confirmation"));
-   evas_object_size_hint_align_set(editor->popup, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   evas_object_size_hint_weight_set(editor->popup, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   scale = elm_config_scale_get();
+   evas_object_size_hint_min_set(editor->popup, 320 * scale, 110 * scale);
+   evas_object_size_hint_max_set(editor->popup, 520 * scale, 300 * scale);
+   evas_object_size_hint_align_set(editor->popup, 0.5, 0.5);
+   evas_object_size_hint_weight_set(editor->popup, 0.0, 0.0);
 
    table = elm_table_add(editor->popup);
+   elm_table_padding_set(table, 10 * scale, 10 * scale);
    icon = elm_icon_add(table);
    elm_icon_standard_set(icon, "dialog-warning");
-   evas_object_size_hint_min_set(icon, 48 * elm_config_scale_get(), 48 * elm_config_scale_get());
+   evas_object_size_hint_min_set(icon, 48 * scale, 48 * scale);
    evas_object_size_hint_weight_set(icon, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(icon, EVAS_HINT_FILL, EVAS_HINT_FILL);
    evas_object_show(icon);
    elm_table_pack(table, icon, 0, 0, 1, 1);
 
-   frame = elm_frame_add(editor->popup);
-   elm_object_content_set(frame, table);
-   evas_object_show(frame);
-
    box = elm_box_add(editor->popup);
+   sep = elm_separator_add(box);
+   elm_separator_horizontal_set(sep, EINA_TRUE);
+   evas_object_show(sep);
+   elm_box_pack_end(box, sep);
+   elm_box_pack_end(box, table);
    label = elm_label_add(editor->popup);
+   elm_label_line_wrap_set(label, ELM_WRAP_MIXED);
+   elm_label_wrap_width_set(label, 320 * scale);
+   evas_object_size_hint_weight_set(label, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(label, EVAS_HINT_FILL, 0.0);
    elm_object_text_set(label, _("File contents have changed. Would you like to reload <br> the contents of this file?"));
    evas_object_show(label);
-   elm_box_pack_end(box, label);
+   elm_table_pack(table, label, 1, 0, 1, 1);
+   evas_object_show(table);
 
    sep = elm_separator_add(box);
    elm_separator_horizontal_set(sep, EINA_TRUE);
    evas_object_show(sep);
    elm_box_pack_end(box, sep);
    evas_object_show(box);
-   elm_table_pack(table, box, 1, 0, 1, 1);
-
-   elm_object_content_set(editor->popup, frame);
-   evas_object_show(table);
+   elm_object_content_set(editor->popup, box);
 
    button = elm_button_add(editor->popup);
    elm_object_text_set(button, _("Reload"));
@@ -808,7 +824,7 @@ _suggest_hint_show_snippet(Edi_Editor *editor, const char *word)
      return;
 
    _suggest_hint = _suggest_hint_popup_add(editor,
-      eina_slstr_printf("Press tab to insert snippet <hilight>%s</hilight>", word),
+      eina_slstr_printf("Press tab to insert snippet '%s'", word),
       _suggest_hint_click_snippet);
    evas_object_show(_suggest_hint);
 }
@@ -861,7 +877,7 @@ _suggest_hint_show_match(Edi_Editor *editor, const char *word)
      return;
 
    _suggest_hint = _suggest_hint_popup_add(editor,
-      eina_slstr_printf("Press tab to insert suggestion <hilight>%s</hilight>", match->summary),
+      eina_slstr_printf("Press tab to insert suggestion '%s'", match->summary),
       _suggest_hint_click_suggest);
 
    evas_object_show(_suggest_hint);

@@ -574,7 +574,7 @@ _item_menu_del_cb(void *data, Evas_Object *obj EINA_UNUSED,
    Edi_Dir_Data *sd = data;
    Eina_Strbuf *message = eina_strbuf_new();
 
-   eina_strbuf_append_printf(message, _("Are you sure you want to delete <hilight>%s</hilight> ?"),
+   eina_strbuf_append_printf(message, _("Are you sure you want to delete '%s'?"),
                              ecore_file_file_get(sd->path));
 
    edi_screens_message_confirm(_main_win, eina_strbuf_string_get(message),
@@ -657,7 +657,7 @@ _item_menu_scm_del_cb(void *data, Evas_Object *obj EINA_UNUSED,
    Edi_Dir_Data *sd = data;
    Eina_Strbuf *message = eina_strbuf_new();
 
-   eina_strbuf_append_printf(message, _("Are you sure you want to delete <hilight>%s</hilight> ?"),
+   eina_strbuf_append_printf(message, _("Are you sure you want to delete '%s'?"),
                              ecore_file_file_get(sd->path));
    edi_screens_message_confirm(_main_win, eina_strbuf_string_get(message),
                                _item_menu_scm_del_do_cb, data);
@@ -816,7 +816,7 @@ _item_menu_rmdir_cb(void *data, Evas_Object *obj EINA_UNUSED,
    Edi_Dir_Data *sd = data;
    Eina_Strbuf *message = eina_strbuf_new();
 
-   eina_strbuf_append_printf(message, _("Are you sure you want to delete <hilight>%s</hilight> ?"),
+   eina_strbuf_append_printf(message, _("Are you sure you want to delete '%s'?"),
                              ecore_file_file_get(sd->path));
 
    edi_screens_message_confirm(_main_win, eina_strbuf_string_get(message),

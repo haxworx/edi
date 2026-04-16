@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <ctype.h>
+#include <stdio.h>
 
 #include <Ecore.h>
 #include <Ecore_Con.h>
@@ -12,7 +13,6 @@
 #include "edi_agent_parse.h"
 
 #define EDI_AGENT_DEFAULT_TIMEOUT 30.0
-#define EDI_AGENT_LINE_WRAP_INSTRUCTION "\n\nFormatting requirement: Respond with lines no longer than 80 characters."
 
 struct _Edi_Agent_Request
 {
@@ -52,9 +52,9 @@ enum
 static const Edi_Agent_Provider _edi_agent_providers[] =
 {
    { "google_codex", "Google Codex", "https://generativelanguage.googleapis.com/v1beta/models", "gemini-2.5-flash" },
-   { "local_http", "Local HTTP Agent", "http://127.0.0.1:11434/v1/chat/completions", "qwen2.5-coder:latest" },
-   { "microsoft_copilot", "Microsoft Copilot", "https://api.githubcopilot.com/chat/completions", "gpt-4.1-mini" },
-   { "openai_compatible", "OpenAI Compatible", "https://api.openai.com/v1/chat/completions", "gpt-4.1-mini" }
+   { "local_http", "Local HTTP Agent", "http://127.0.0.1:11434/v1/responses", "qwen2.5-coder:latest" },
+   { "microsoft_copilot", "Microsoft Copilot", "https://api.githubcopilot.com/v1/responses", "gpt-4.1-mini" },
+   { "openai_compatible", "OpenAI Compatible", "https://api.openai.com/v1/responses", "gpt-4.1-mini" }
 };
 
 static const char *_edi_agent_models_google_codex[] =
@@ -95,6 +95,69 @@ static const char *_edi_agent_models_openai_compatible[] =
 static Ecore_Event_Handler *_url_data_hdl = NULL;
 static Ecore_Event_Handler *_url_complete_hdl = NULL;
 static Eina_Bool _url_inited = EINA_FALSE;
+static char *_edi_agent_prompt_suffix = NULL;
+static Eina_Bool _edi_agent_prompt_suffix_loaded = EINA_FALSE;
+
+static char *
+_edi_agent_file_read_all(const char *path)
+{
+   FILE *f;
+   long len;
+   char *buf;
+   size_t got;
+
+   if (!path || !path[0])
+     return NULL;
+
+   f = fopen(path, "rb");
+   if (!f)
+     return NULL;
+
+   if (fseek(f, 0, SEEK_END) != 0)
+     {
+        fclose(f);
+        return NULL;
+     }
+
+   len = ftell(f);
+   if (len < 0)
+     {
+        fclose(f);
+        return NULL;
+     }
+   rewind(f);
+
+   buf = calloc(1, (size_t) len + 1);
+   if (!buf)
+     {
+        fclose(f);
+        return NULL;
+     }
+
+   got = fread(buf, 1, (size_t) len, f);
+   fclose(f);
+   if (got != (size_t) len)
+     {
+        free(buf);
+        return NULL;
+     }
+
+   buf[len] = '\0';
+   return buf;
+}
+
+static const char *
+_edi_agent_prompt_suffix_get(void)
+{
+   if (_edi_agent_prompt_suffix_loaded)
+     return _edi_agent_prompt_suffix ?: "";
+
+   _edi_agent_prompt_suffix_loaded = EINA_TRUE;
+   _edi_agent_prompt_suffix =
+      _edi_agent_file_read_all(PACKAGE_DATA_DIR "/prompts/agent_prompt_suffix.txt");
+
+   return _edi_agent_prompt_suffix ?: "";
+}
 
 static Edi_Agent_Model_List
 _edi_agent_provider_models_for_id_get(const char *provider_id)
@@ -464,6 +527,10 @@ _edi_agent_models_url_build(const Edi_Project_Config *config, const char *provid
         marker = strstr(eina_strbuf_string_get(url), "/v1/chat/completions");
         if (!marker)
           marker = strstr(eina_strbuf_string_get(url), "/chat/completions");
+        if (!marker)
+          marker = strstr(eina_strbuf_string_get(url), "/v1/responses");
+        if (!marker)
+          marker = strstr(eina_strbuf_string_get(url), "/responses");
         if (marker)
           eina_strbuf_remove(url, marker - eina_strbuf_string_get(url), eina_strbuf_length_get(url));
         if (eina_strbuf_length_get(url) == 0 ||
@@ -474,6 +541,8 @@ _edi_agent_models_url_build(const Edi_Project_Config *config, const char *provid
    else
      {
         marker = strstr(eina_strbuf_string_get(url), "/chat/completions");
+        if (!marker)
+          marker = strstr(eina_strbuf_string_get(url), "/responses");
         if (marker)
           {
              eina_strbuf_remove(url, marker - eina_strbuf_string_get(url), eina_strbuf_length_get(url));
@@ -938,7 +1007,9 @@ edi_agent_request_send_stream(const char *prompt, Edi_Agent_Token_Cb token_cb,
    provider_id = provider->id;
 
    if (!strcmp(provider_id, "google_codex") && endpoint &&
-       (strstr(endpoint, "api.openai.com/") || strstr(endpoint, "/chat/completions")))
+      (strstr(endpoint, "api.openai.com/") ||
+       strstr(endpoint, "/chat/completions") ||
+       strstr(endpoint, "/responses")))
      provider_id = "openai_compatible";
 
    if (!model || !model[0] || !edi_agent_provider_model_supported(provider_id, model))
@@ -957,7 +1028,8 @@ edi_agent_request_send_stream(const char *prompt, Edi_Agent_Token_Cb token_cb,
 
    url = eina_strbuf_new();
    payload = eina_strbuf_new();
-   prompt_with_rules = eina_slstr_printf("%s%s", prompt, EDI_AGENT_LINE_WRAP_INSTRUCTION);
+   prompt_with_rules = eina_slstr_printf("%s%s", prompt,
+                                         _edi_agent_prompt_suffix_get());
    prompt_esc = _edi_agent_json_escape(prompt_with_rules);
    model_esc = _edi_agent_json_escape(model);
 
@@ -977,9 +1049,26 @@ edi_agent_request_send_stream(const char *prompt, Edi_Agent_Token_Cb token_cb,
      }
    else
      {
+        const char *marker;
+
         eina_strbuf_append(url, endpoint);
+        marker = strstr(eina_strbuf_string_get(url), "/v1/chat/completions");
+        if (marker)
+          {
+             eina_strbuf_remove(url, marker - eina_strbuf_string_get(url), eina_strbuf_length_get(url));
+             eina_strbuf_append(url, "/v1/responses");
+          }
+        else
+          {
+             marker = strstr(eina_strbuf_string_get(url), "/chat/completions");
+             if (marker)
+               {
+                  eina_strbuf_remove(url, marker - eina_strbuf_string_get(url), eina_strbuf_length_get(url));
+                  eina_strbuf_append(url, "/responses");
+               }
+          }
         eina_strbuf_append_printf(payload,
-                                  "{\"model\":\"%s\",\"stream\":%s,\"messages\":[{\"role\":\"user\",\"content\":\"%s\"}]}",
+                                  "{\"model\":\"%s\",\"stream\":%s,\"input\":\"%s\"}",
                                   model_esc, req->stream ? "true" : "false", prompt_esc);
      }
 

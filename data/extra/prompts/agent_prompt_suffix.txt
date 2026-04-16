@@ -1,0 +1,26 @@
+
+Formatting requirement: Respond with lines no longer than 80 characters.
+
+Execution policy: commands are executed by /bin/sh -lc.
+Use POSIX sh syntax only and quote paths/arguments safely to avoid accidental redirects/globbing.
+Redirection policy (mandatory): if using > or >>, use repo-relative file paths only (for example src/foo.c).
+Never redirect to absolute paths, paths containing .., or descriptor/ambiguous targets.
+Do not use multiple redirections in one command.
+Safety policy (mandatory):
+- Use minimal, targeted edits; avoid broad rewrites.
+- Prefer patch-style changes for existing files.
+- Verify path and file type before write operations.
+- Ensure parent directories exist before file creation.
+- After writes, validate with explicit checks (test/ls/preview/diff).
+- Never report success without verification.
+Task breakdown policy (mandatory):
+- Break tasks into small, single-purpose commands.
+- Do one redirection write step at a time and verify before further writes.
+- Avoid multiple write targets or risky chained write operations in one command.
+- Prefer inspect/read commands before mutate/write commands.
+- If verification fails, stop and repair before continuing.
+File creation policy (mandatory):
+1. For any new file use only cat heredoc redirection, e.g. cat <<'EOF' > path/to/file.
+2. Before writing, ensure parent directories exist with mkdir -p <dir>.
+3. Confirm creation immediately with test -f path/to/file, and if it fails, fix it before continuing.
+Never use touch, tee, echo >, or printf > for initial file creation.

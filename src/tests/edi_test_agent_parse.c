@@ -35,6 +35,34 @@ START_TEST(edi_test_agent_parse_openai_response)
 }
 END_TEST
 
+START_TEST(edi_test_agent_parse_openai_responses_output_text)
+{
+   char *parsed;
+
+   parsed = edi_agent_response_parse_for_provider(
+      "openai_compatible",
+      "{\"output\":[{\"content\":[{\"type\":\"output_text\",\"text\":\"refactor done\"}]}]}");
+
+   ck_assert_ptr_nonnull(parsed);
+   ck_assert_str_eq(parsed, "refactor done");
+   free(parsed);
+}
+END_TEST
+
+START_TEST(edi_test_agent_parse_openai_responses_delta)
+{
+   char *parsed;
+
+   parsed = edi_agent_response_parse_for_provider(
+      "openai_compatible",
+      "{\"type\":\"response.output_text.delta\",\"delta\":\"abc\"}");
+
+   ck_assert_ptr_nonnull(parsed);
+   ck_assert_str_eq(parsed, "abc");
+   free(parsed);
+}
+END_TEST
+
 START_TEST(edi_test_agent_parse_error_message)
 {
    char *parsed;
@@ -60,7 +88,7 @@ START_TEST(edi_test_agent_validate_rules)
    cfg.agent.enabled = EINA_TRUE;
 
    err = edi_agent_provider_validate_for_provider(&cfg, "openai_compatible",
-                                                  "https://api.example.com/v1/chat/completions",
+                                                  "https://api.example.com/v1/responses",
                                                   "gpt-test");
    ck_assert_ptr_nonnull(err);
    ck_assert_str_eq(err, "API key is required for this provider.");
@@ -68,13 +96,13 @@ START_TEST(edi_test_agent_validate_rules)
 
    cfg.agent.api_key = "token";
    err = edi_agent_provider_validate_for_provider(&cfg, "openai_compatible",
-                                                  "https://api.example.com/v1/chat/completions",
+                                                  "https://api.example.com/v1/responses",
                                                   "gpt-test");
    ck_assert_ptr_null(err);
 
    cfg.agent.api_key = "";
    err = edi_agent_provider_validate_for_provider(&cfg, "local_http",
-                                                  "http://127.0.0.1:11434/v1/chat/completions",
+                                                  "http://127.0.0.1:11434/v1/responses",
                                                   "qwen2.5");
    ck_assert_ptr_null(err);
 }
@@ -85,6 +113,8 @@ edi_test_agent_parse(TCase *tc)
 {
    tcase_add_test(tc, edi_test_agent_parse_google_response);
    tcase_add_test(tc, edi_test_agent_parse_openai_response);
+   tcase_add_test(tc, edi_test_agent_parse_openai_responses_output_text);
+   tcase_add_test(tc, edi_test_agent_parse_openai_responses_delta);
    tcase_add_test(tc, edi_test_agent_parse_error_message);
    tcase_add_test(tc, edi_test_agent_validate_rules);
 }

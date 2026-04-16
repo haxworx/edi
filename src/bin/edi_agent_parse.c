@@ -148,7 +148,24 @@ edi_agent_response_parse_for_provider(const char *provider, const char *json)
    if (provider && !strcmp(provider, "google_codex"))
      text = _edi_agent_json_first_string_value_get(json, "\"text\"");
    else
-     text = _edi_agent_json_first_string_value_get(json, "\"content\"");
+     {
+        text = _edi_agent_json_first_string_value_get(json, "\"delta\"");
+        if (!text || !text[0])
+          {
+             free(text);
+             text = _edi_agent_json_first_string_value_get(json, "\"output_text\"");
+          }
+        if (!text || !text[0])
+          {
+             free(text);
+             text = _edi_agent_json_first_string_value_get(json, "\"text\"");
+          }
+        if (!text || !text[0])
+          {
+             free(text);
+             text = _edi_agent_json_first_string_value_get(json, "\"content\"");
+          }
+     }
 
    if (text && text[0])
      return text;
