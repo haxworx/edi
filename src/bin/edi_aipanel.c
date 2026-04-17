@@ -1590,7 +1590,7 @@ _edi_aipanel_send(Evas_Object *entry)
    free(agent_prompt);
    if (!_edi_ai_request)
      {
-        _edi_aipanel_append_line("Error: Agent is not configured. Check Project Settings -> AI Agents.");
+        _edi_aipanel_append_line("Error: Agent is not configured. Check Settings -> AI.");
         _edi_ai_follow_tail = EINA_FALSE;
         _edi_ai_stream_row = 0;
         _edi_ai_agent_steps = 0;
@@ -1725,7 +1725,7 @@ edi_aipanel_add(Evas_Object *parent)
    _edi_ai_copy_button = copy_button;
 
    _edi_aipanel_append_line("AI panel ready.");
-   _edi_aipanel_append_line("Configure provider/auth in Settings -> Project -> AI Agents.");
+   _edi_aipanel_append_line("Configure provider/auth in Settings -> AI.");
    if (_edi_aipanel_edits_enabled_get())
      _edi_aipanel_append_line("Agent can request local commands with <edi-run>...</edi-run>.");
    _edi_aipanel_append_line("");

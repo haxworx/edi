@@ -28,6 +28,7 @@ typedef enum _Edi_Settings_Tab
    EDI_SETTINGS_TAB_PROJECT = 1,
    EDI_SETTINGS_TAB_BUILDS = 2,
    EDI_SETTINGS_TAB_BEHAVIOUR = 3,
+   EDI_SETTINGS_TAB_AI = 4,
 } Edi_Settings_Tab;
 
 /**

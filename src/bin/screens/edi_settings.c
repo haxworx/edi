@@ -20,11 +20,14 @@
 
 static Evas_Object *_edi_settings_win;
 static Elm_Object_Item *_edi_settings_display, *_edi_settings_builds,
-                       *_edi_settings_behaviour, *_edi_settings_project;
+                       *_edi_settings_behaviour, *_edi_settings_project,
+                       *_edi_settings_ai;
 static Ecore_Event_Handler *_edi_settings_config_handler;
 static Evas_Object *_edi_settings_font_preview_code;
 static Evas_Object *_edi_settings_agent_model_combobox;
 static Edi_Agent_Models_Request *_edi_settings_agent_models_request;
+
+static void _edi_settings_toolbar_single_select(Evas_Object *tb, Elm_Object_Item *selected);
 
 #define EDI_SETTINGS_TABLE_PADDING 5
 
@@ -100,14 +103,20 @@ _edi_settings_exit(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EI
 }
 
 static void
-_edi_settings_category_cb(void *data, Evas_Object *obj EINA_UNUSED, void *event_info)
+_edi_settings_category_cb(void *data, Evas_Object *obj, void *event_info)
 {
    Elm_Object_Item *item, *toolbar_item;
 
    item = (Elm_Object_Item *)data;
    toolbar_item = (Elm_Object_Item *)event_info;
-   if (toolbar_item && !elm_toolbar_item_selected_get(toolbar_item))
+   if (!toolbar_item)
      return;
+   if (!elm_toolbar_item_selected_get(toolbar_item))
+     return;
+   if (elm_object_item_data_get(toolbar_item) != item)
+     return;
+
+   _edi_settings_toolbar_single_select(obj, toolbar_item);
 
    elm_naviframe_item_promote(item);
 }
@@ -811,6 +820,7 @@ _edi_settings_project_agent_model_combobox_rebuild(Evas_Object *combobox,
                                                    unsigned int source_count)
 {
    Elm_Genlist_Item_Class *itc;
+   Elm_Object_Item *it;
    char **models = NULL;
    const char *model;
    unsigned int count = 0;
@@ -862,8 +872,12 @@ _edi_settings_project_agent_model_combobox_rebuild(Evas_Object *combobox,
    itc->func.text_get = _edi_settings_project_agent_model_text_get_cb;
 
    for (i = 0; i < count; i++)
-     elm_genlist_item_append(combobox, itc, (void *)models[i], NULL,
-                             ELM_GENLIST_ITEM_NONE, NULL, (void *)models[i]);
+     {
+        it = elm_genlist_item_append(combobox, itc, (void *)models[i], NULL,
+                                     ELM_GENLIST_ITEM_NONE, NULL, (void *)models[i]);
+        if (model && !strcmp(models[i], model))
+          elm_genlist_item_selected_set(it, EINA_TRUE);
+     }
 
    elm_genlist_realized_items_update(combobox);
    elm_genlist_item_class_free(itc);
@@ -947,6 +961,7 @@ static void
 _edi_settings_project_agent_model_pressed_cb(void *data EINA_UNUSED, Evas_Object *obj,
                                              void *event_info)
 {
+   Elm_Object_Item *item = event_info;
    const char *model = elm_object_item_data_get(event_info);
    const char *text = elm_object_item_text_get(event_info);
 
@@ -956,6 +971,8 @@ _edi_settings_project_agent_model_pressed_cb(void *data EINA_UNUSED, Evas_Object
    _edi_settings_project_agent_model_set(model);
    _edi_project_config_save();
    elm_object_text_set(obj, text ?: model);
+   if (item)
+     elm_genlist_item_selected_set(item, EINA_TRUE);
    elm_combobox_hover_end(obj);
 }
 
@@ -1020,6 +1037,268 @@ _edi_settings_project_agent_steps_max_cb(void *data EINA_UNUSED, Evas_Object *ob
    _edi_project_config_save();
 }
 
+static char *
+_edi_settings_project_agent_provider_text_get_cb(void *data, Evas_Object *obj EINA_UNUSED,
+                                                 const char *part EINA_UNUSED);
+
+static void
+_edi_settings_project_agent_provider_pressed_cb(void *data EINA_UNUSED, Evas_Object *obj,
+                                                void *event_info);
+
+static void
+_edi_settings_project_agent_test_cb(void *data, Evas_Object *obj EINA_UNUSED,
+                                    void *event_info EINA_UNUSED);
+
+static Evas_Object *
+_edi_settings_ai_create(Evas_Object *parent)
+{
+   Evas_Object *box, *frame, *table, *label, *entry, *check, *combobox, *spinner, *button;
+   Evas_Object *combobox_model, *entry_endpoint;
+   Evas_Object *scroller, *content, *spacer;
+   Elm_Object_Item *it;
+   Elm_Genlist_Item_Class *itc;
+   const Edi_Agent_Provider *providers, *provider;
+   const char *active_model;
+   const char *saved_model;
+   unsigned int count, i;
+
+   frame = elm_box_add(parent);
+   elm_box_horizontal_set(frame, EINA_FALSE);
+   evas_object_size_hint_weight_set(frame, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(frame, EVAS_HINT_FILL, 0.5);
+   evas_object_show(frame);
+   box = frame;
+
+   table = elm_table_add(parent);
+   evas_object_size_hint_weight_set(table, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(table, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_table_padding_set(table, EDI_SETTINGS_TABLE_PADDING, EDI_SETTINGS_TABLE_PADDING);
+   elm_box_pack_end(box, table);
+   evas_object_show(table);
+
+   check = elm_check_add(table);
+   elm_object_text_set(check, _("Enable AI agent"));
+   elm_check_state_set(check, _edi_project_config->agent.enabled);
+   evas_object_size_hint_weight_set(check, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(check, EVAS_HINT_FILL, 0.5);
+   elm_table_pack(table, check, 0, 0, 1, 1);
+   evas_object_smart_callback_add(check, "changed",
+                                  _edi_settings_project_agent_enabled_cb, NULL);
+   evas_object_show(check);
+
+   check = elm_check_add(table);
+   elm_object_text_set(check, _("Enable AI Edits (beta)"));
+   elm_check_state_set(check, _edi_project_config->agent.edits_enabled);
+   evas_object_size_hint_weight_set(check, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(check, EVAS_HINT_FILL, 0.5);
+   elm_table_pack(table, check, 1, 0, 1, 1);
+   evas_object_smart_callback_add(check, "changed",
+                                  _edi_settings_project_agent_edits_enabled_cb, NULL);
+   evas_object_show(check);
+
+   label = elm_label_add(table);
+   elm_object_text_set(label, _("Provider"));
+   evas_object_size_hint_weight_set(label, 0.0, 0.0);
+   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
+   elm_table_pack(table, label, 0, 1, 1, 1);
+   evas_object_show(label);
+
+   combobox = elm_combobox_add(table);
+   evas_object_size_hint_weight_set(combobox, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(combobox, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   evas_object_show(combobox);
+   evas_object_smart_callback_add(combobox, "item,pressed",
+                                  _edi_settings_project_agent_provider_pressed_cb, NULL);
+   elm_table_pack(table, combobox, 1, 1, 1, 1);
+
+   providers = edi_agent_providers_get(&count);
+   provider = edi_agent_provider_current_get();
+   elm_object_text_set(combobox, provider->name);
+
+   itc = elm_genlist_item_class_new();
+   itc->item_style = "default";
+   itc->func.text_get = _edi_settings_project_agent_provider_text_get_cb;
+
+   for (i = 0; i < count; i++)
+     {
+        it = elm_genlist_item_append(combobox, itc, (void *)&providers[i], NULL,
+                                     ELM_GENLIST_ITEM_NONE, NULL, (void *)&providers[i]);
+        if (!strcmp(providers[i].id, provider->id))
+          elm_genlist_item_selected_set(it, EINA_TRUE);
+     }
+
+   elm_genlist_realized_items_update(combobox);
+   elm_genlist_item_class_free(itc);
+
+   label = elm_label_add(table);
+   elm_object_text_set(label, _("Model"));
+   evas_object_size_hint_weight_set(label, 0.0, 0.0);
+   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
+   elm_table_pack(table, label, 0, 2, 1, 1);
+   evas_object_show(label);
+
+   combobox_model = elm_combobox_add(table);
+   evas_object_size_hint_weight_set(combobox_model, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(combobox_model, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   evas_object_show(combobox_model);
+   evas_object_smart_callback_add(combobox_model, "item,pressed",
+                                  _edi_settings_project_agent_model_pressed_cb, NULL);
+   elm_table_pack(table, combobox_model, 1, 2, 1, 1);
+   _edi_settings_agent_model_combobox = combobox_model;
+
+   saved_model = _edi_project_config->agent.model ?: "";
+   active_model = _edi_settings_project_agent_models_refresh(combobox_model,
+                                                             provider->id,
+                                                             saved_model);
+   if (strcmp(saved_model, active_model ?: ""))
+     {
+        _edi_settings_project_agent_model_set(active_model);
+        _edi_project_config_save();
+     }
+
+   label = elm_label_add(table);
+   elm_object_text_set(label, _("Endpoint"));
+   evas_object_size_hint_weight_set(label, 0.0, 0.0);
+   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
+   elm_table_pack(table, label, 0, 3, 1, 1);
+   evas_object_show(label);
+
+   entry_endpoint = elm_entry_add(table);
+   elm_object_text_set(entry_endpoint, _edi_project_config->agent.endpoint ?: "");
+   elm_entry_single_line_set(entry_endpoint, EINA_TRUE);
+   elm_entry_scrollable_set(entry_endpoint, EINA_TRUE);
+   evas_object_size_hint_weight_set(entry_endpoint, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(entry_endpoint, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_table_pack(table, entry_endpoint, 1, 3, 1, 1);
+   evas_object_show(entry_endpoint);
+   evas_object_smart_callback_add(entry_endpoint, "changed",
+                                  _edi_settings_project_agent_endpoint_cb, NULL);
+
+   evas_object_data_set(combobox, "agent_model_combobox", combobox_model);
+   evas_object_data_set(combobox, "agent_endpoint_entry", entry_endpoint);
+
+   label = elm_label_add(table);
+   elm_object_text_set(label, _("API Key / Token"));
+   evas_object_size_hint_weight_set(label, 0.0, 0.0);
+   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
+   elm_table_pack(table, label, 0, 4, 1, 1);
+   evas_object_show(label);
+
+   entry = elm_entry_add(table);
+   elm_object_text_set(entry, _edi_project_config->agent.api_key ?: "");
+   elm_entry_single_line_set(entry, EINA_TRUE);
+   elm_entry_scrollable_set(entry, EINA_TRUE);
+   elm_entry_password_set(entry, EINA_TRUE);
+   evas_object_size_hint_weight_set(entry, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_table_pack(table, entry, 1, 4, 1, 1);
+   evas_object_show(entry);
+   evas_object_smart_callback_add(entry, "changed",
+                                  _edi_settings_project_agent_api_key_cb, NULL);
+
+   label = elm_label_add(table);
+   elm_object_text_set(label, _("Project ID (Google only)"));
+   evas_object_size_hint_weight_set(label, 0.0, 0.0);
+   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
+   elm_table_pack(table, label, 0, 5, 1, 1);
+   evas_object_show(label);
+
+   entry = elm_entry_add(table);
+   elm_object_text_set(entry, _edi_project_config->agent.project_id ?: "");
+   elm_entry_single_line_set(entry, EINA_TRUE);
+   elm_entry_scrollable_set(entry, EINA_TRUE);
+   evas_object_size_hint_weight_set(entry, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_table_pack(table, entry, 1, 5, 1, 1);
+   evas_object_show(entry);
+   evas_object_smart_callback_add(entry, "changed",
+                                  _edi_settings_project_agent_project_id_cb, NULL);
+
+   label = elm_label_add(table);
+   elm_object_text_set(label, _("Timeout (seconds)"));
+   evas_object_size_hint_weight_set(label, 0.0, 0.0);
+   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
+   elm_table_pack(table, label, 0, 6, 1, 1);
+   evas_object_show(label);
+
+   spinner = elm_spinner_add(table);
+   elm_spinner_min_max_set(spinner, 5.0, 300.0);
+   elm_spinner_step_set(spinner, 1.0);
+   elm_spinner_editable_set(spinner, EINA_TRUE);
+   elm_spinner_wrap_set(spinner, EINA_FALSE);
+   elm_spinner_value_set(spinner, _edi_project_config->agent.timeout_seconds > 0.0 ?
+                                  _edi_project_config->agent.timeout_seconds : 30.0);
+   evas_object_size_hint_weight_set(spinner, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(spinner, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_table_pack(table, spinner, 1, 6, 1, 1);
+   evas_object_show(spinner);
+   evas_object_smart_callback_add(spinner, "changed",
+                                  _edi_settings_project_agent_timeout_cb, NULL);
+
+   label = elm_label_add(table);
+   elm_object_text_set(label, _("Max AI edit steps"));
+   evas_object_size_hint_weight_set(label, 0.0, 0.0);
+   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
+   elm_table_pack(table, label, 0, 7, 1, 1);
+   evas_object_show(label);
+
+   spinner = elm_spinner_add(table);
+   elm_spinner_min_max_set(spinner, 1.0, 4096.0);
+   elm_spinner_step_set(spinner, 1.0);
+   elm_spinner_editable_set(spinner, EINA_TRUE);
+   elm_spinner_wrap_set(spinner, EINA_FALSE);
+   elm_spinner_value_set(spinner, _edi_project_config->agent.steps_max > 0 ?
+                                  _edi_project_config->agent.steps_max : 256);
+   evas_object_size_hint_weight_set(spinner, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(spinner, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_table_pack(table, spinner, 1, 7, 1, 1);
+   evas_object_show(spinner);
+   evas_object_smart_callback_add(spinner, "changed",
+                                  _edi_settings_project_agent_steps_max_cb, NULL);
+
+   button = elm_button_add(table);
+   elm_object_text_set(button, _("Test Connection"));
+   evas_object_size_hint_weight_set(button, EVAS_HINT_EXPAND, 0.0);
+   evas_object_size_hint_align_set(button, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_table_pack(table, button, 1, 8, 1, 1);
+   evas_object_show(button);
+   evas_object_smart_callback_add(button, "clicked",
+                                  _edi_settings_project_agent_test_cb, button);
+
+   content = elm_box_add(parent);
+   elm_box_horizontal_set(content, EINA_FALSE);
+   evas_object_size_hint_weight_set(content, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(content, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   evas_object_show(content);
+
+   spacer = evas_object_rectangle_add(evas_object_evas_get(content));
+   evas_object_color_set(spacer, 0, 0, 0, 0);
+   evas_object_size_hint_weight_set(spacer, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(spacer, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_box_pack_end(content, spacer);
+   evas_object_show(spacer);
+
+   elm_box_pack_end(content, frame);
+   evas_object_show(frame);
+
+   spacer = evas_object_rectangle_add(evas_object_evas_get(content));
+   evas_object_color_set(spacer, 0, 0, 0, 0);
+   evas_object_size_hint_weight_set(spacer, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(spacer, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_box_pack_end(content, spacer);
+   evas_object_show(spacer);
+
+   scroller = elm_scroller_add(parent);
+   elm_scroller_policy_set(scroller, ELM_SCROLLER_POLICY_OFF, ELM_SCROLLER_POLICY_AUTO);
+   elm_scroller_bounce_set(scroller, EINA_FALSE, EINA_TRUE);
+   evas_object_size_hint_weight_set(scroller, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(scroller, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_object_content_set(scroller, content);
+   evas_object_show(scroller);
+
+   return scroller;
+}
+
 static void
 _edi_settings_project_agent_test_done_cb(const char *response, const char *error, void *data)
 {
@@ -1075,6 +1354,7 @@ _edi_settings_project_agent_provider_pressed_cb(void *data EINA_UNUSED, Evas_Obj
                                                 void *event_info)
 {
    const Edi_Agent_Provider *provider = elm_object_item_data_get(event_info);
+   Elm_Object_Item *item = event_info;
    const char *text = elm_object_item_text_get(event_info);
    const char *model;
    Evas_Object *model_combobox;
@@ -1102,6 +1382,8 @@ _edi_settings_project_agent_provider_pressed_cb(void *data EINA_UNUSED, Evas_Obj
 
    _edi_project_config_save();
    elm_object_text_set(obj, text);
+   if (item)
+     elm_genlist_item_selected_set(item, EINA_TRUE);
    elm_combobox_hover_end(obj);
 }
 
@@ -1161,13 +1443,7 @@ _edi_settings_project_create(Evas_Object *parent)
    Evas_Object *box, *frames, *frame, *table, *label, *entry_name, *entry_email;
    Evas_Object *spacer;
    Evas_Object *scroller;
-   Evas_Object *entry_remote, *entry, *check, *combobox, *spinner, *button;
-   Evas_Object *combobox_model, *entry_endpoint;
-   Elm_Genlist_Item_Class *itc;
-   const Edi_Agent_Provider *providers, *provider;
-   const char *active_model;
-   const char *saved_model;
-   unsigned int count, i;
+   Evas_Object *entry_remote;
    Eina_Strbuf *text;
    const char *remote_name, *remote_email;
 
@@ -1310,206 +1586,6 @@ _edi_settings_project_create(Evas_Object *parent)
                                        _edi_settings_project_remote_cb, NULL);
      }
 
-   frame = _edi_settings_panel_create(frames, _("AI Agents"));
-   evas_object_size_hint_weight_set(frame, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-   evas_object_size_hint_align_set(frame, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_box_pack_end(frames, frame);
-   box = elm_object_part_content_get(frame, "default");
-   evas_object_size_hint_weight_set(box, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-   evas_object_size_hint_align_set(box, EVAS_HINT_FILL, EVAS_HINT_FILL);
-
-   table = elm_table_add(parent);
-   evas_object_size_hint_weight_set(table, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-   evas_object_size_hint_align_set(table, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_table_padding_set(table, EDI_SETTINGS_TABLE_PADDING, EDI_SETTINGS_TABLE_PADDING);
-   elm_box_pack_end(box, table);
-   evas_object_show(table);
-
-   check = elm_check_add(table);
-   elm_object_text_set(check, _("Enable AI agent"));
-   elm_check_state_set(check, _edi_project_config->agent.enabled);
-   evas_object_size_hint_weight_set(check, EVAS_HINT_EXPAND, 0.0);
-   evas_object_size_hint_align_set(check, EVAS_HINT_FILL, 0.5);
-   elm_table_pack(table, check, 0, 0, 1, 1);
-   evas_object_smart_callback_add(check, "changed",
-                                  _edi_settings_project_agent_enabled_cb, NULL);
-   evas_object_show(check);
-
-   check = elm_check_add(table);
-   elm_object_text_set(check, _("Enable AI Edits (beta)"));
-   elm_check_state_set(check, _edi_project_config->agent.edits_enabled);
-   evas_object_size_hint_weight_set(check, EVAS_HINT_EXPAND, 0.0);
-   evas_object_size_hint_align_set(check, EVAS_HINT_FILL, 0.5);
-   elm_table_pack(table, check, 1, 0, 1, 1);
-   evas_object_smart_callback_add(check, "changed",
-                                  _edi_settings_project_agent_edits_enabled_cb, NULL);
-   evas_object_show(check);
-
-   label = elm_label_add(table);
-   elm_object_text_set(label, _("Provider"));
-   evas_object_size_hint_weight_set(label, 0.0, 0.0);
-   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
-   elm_table_pack(table, label, 0, 1, 1, 1);
-   evas_object_show(label);
-
-   combobox = elm_combobox_add(table);
-   evas_object_size_hint_weight_set(combobox, EVAS_HINT_EXPAND, 0.0);
-   evas_object_size_hint_align_set(combobox, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   evas_object_show(combobox);
-   evas_object_smart_callback_add(combobox, "item,pressed",
-                                  _edi_settings_project_agent_provider_pressed_cb, NULL);
-   elm_table_pack(table, combobox, 1, 1, 1, 1);
-
-   providers = edi_agent_providers_get(&count);
-   provider = edi_agent_provider_current_get();
-   elm_object_text_set(combobox, provider->name);
-
-   itc = elm_genlist_item_class_new();
-   itc->item_style = "default";
-   itc->func.text_get = _edi_settings_project_agent_provider_text_get_cb;
-
-   for (i = 0; i < count; i++)
-     elm_genlist_item_append(combobox, itc, (void *)&providers[i], NULL,
-                             ELM_GENLIST_ITEM_NONE, NULL, (void *)&providers[i]);
-
-   elm_genlist_realized_items_update(combobox);
-   elm_genlist_item_class_free(itc);
-
-   label = elm_label_add(table);
-   elm_object_text_set(label, _("Model"));
-   evas_object_size_hint_weight_set(label, 0.0, 0.0);
-   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
-   elm_table_pack(table, label, 0, 2, 1, 1);
-   evas_object_show(label);
-
-   combobox_model = elm_combobox_add(table);
-   evas_object_size_hint_weight_set(combobox_model, EVAS_HINT_EXPAND, 0.0);
-   evas_object_size_hint_align_set(combobox_model, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   evas_object_show(combobox_model);
-   evas_object_smart_callback_add(combobox_model, "item,pressed",
-                                  _edi_settings_project_agent_model_pressed_cb, NULL);
-   elm_table_pack(table, combobox_model, 1, 2, 1, 1);
-   _edi_settings_agent_model_combobox = combobox_model;
-
-   saved_model = _edi_project_config->agent.model ?: "";
-   active_model = _edi_settings_project_agent_models_refresh(combobox_model,
-                                                             provider->id,
-                                                             saved_model);
-   if (strcmp(saved_model, active_model ?: ""))
-     {
-        _edi_settings_project_agent_model_set(active_model);
-        _edi_project_config_save();
-     }
-
-   label = elm_label_add(table);
-   elm_object_text_set(label, _("Endpoint"));
-   evas_object_size_hint_weight_set(label, 0.0, 0.0);
-   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
-   elm_table_pack(table, label, 0, 3, 1, 1);
-   evas_object_show(label);
-
-   entry_endpoint = elm_entry_add(table);
-   elm_object_text_set(entry_endpoint, _edi_project_config->agent.endpoint ?: "");
-   elm_entry_single_line_set(entry_endpoint, EINA_TRUE);
-   elm_entry_scrollable_set(entry_endpoint, EINA_TRUE);
-   evas_object_size_hint_weight_set(entry_endpoint, EVAS_HINT_EXPAND, 0.0);
-   evas_object_size_hint_align_set(entry_endpoint, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_table_pack(table, entry_endpoint, 1, 3, 1, 1);
-   evas_object_show(entry_endpoint);
-   evas_object_smart_callback_add(entry_endpoint, "changed",
-                                  _edi_settings_project_agent_endpoint_cb, NULL);
-
-   evas_object_data_set(combobox, "agent_model_combobox", combobox_model);
-   evas_object_data_set(combobox, "agent_endpoint_entry", entry_endpoint);
-
-   label = elm_label_add(table);
-   elm_object_text_set(label, _("API Key / Token"));
-   evas_object_size_hint_weight_set(label, 0.0, 0.0);
-   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
-   elm_table_pack(table, label, 0, 4, 1, 1);
-   evas_object_show(label);
-
-   entry = elm_entry_add(table);
-   elm_object_text_set(entry, _edi_project_config->agent.api_key ?: "");
-   elm_entry_single_line_set(entry, EINA_TRUE);
-   elm_entry_scrollable_set(entry, EINA_TRUE);
-   elm_entry_password_set(entry, EINA_TRUE);
-   evas_object_size_hint_weight_set(entry, EVAS_HINT_EXPAND, 0.0);
-   evas_object_size_hint_align_set(entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_table_pack(table, entry, 1, 4, 1, 1);
-   evas_object_show(entry);
-   evas_object_smart_callback_add(entry, "changed",
-                                  _edi_settings_project_agent_api_key_cb, NULL);
-
-   label = elm_label_add(table);
-   elm_object_text_set(label, _("Project ID (Google only)"));
-   evas_object_size_hint_weight_set(label, 0.0, 0.0);
-   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
-   elm_table_pack(table, label, 0, 5, 1, 1);
-   evas_object_show(label);
-
-   entry = elm_entry_add(table);
-   elm_object_text_set(entry, _edi_project_config->agent.project_id ?: "");
-   elm_entry_single_line_set(entry, EINA_TRUE);
-   elm_entry_scrollable_set(entry, EINA_TRUE);
-   evas_object_size_hint_weight_set(entry, EVAS_HINT_EXPAND, 0.0);
-   evas_object_size_hint_align_set(entry, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_table_pack(table, entry, 1, 5, 1, 1);
-   evas_object_show(entry);
-   evas_object_smart_callback_add(entry, "changed",
-                                  _edi_settings_project_agent_project_id_cb, NULL);
-
-   label = elm_label_add(table);
-   elm_object_text_set(label, _("Timeout (seconds)"));
-   evas_object_size_hint_weight_set(label, 0.0, 0.0);
-   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
-   elm_table_pack(table, label, 0, 6, 1, 1);
-   evas_object_show(label);
-
-   spinner = elm_spinner_add(table);
-   elm_spinner_min_max_set(spinner, 5.0, 300.0);
-   elm_spinner_step_set(spinner, 1.0);
-   elm_spinner_editable_set(spinner, EINA_TRUE);
-   elm_spinner_wrap_set(spinner, EINA_FALSE);
-   elm_spinner_value_set(spinner, _edi_project_config->agent.timeout_seconds > 0.0 ?
-                                  _edi_project_config->agent.timeout_seconds : 30.0);
-   evas_object_size_hint_weight_set(spinner, EVAS_HINT_EXPAND, 0.0);
-   evas_object_size_hint_align_set(spinner, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_table_pack(table, spinner, 1, 6, 1, 1);
-   evas_object_show(spinner);
-   evas_object_smart_callback_add(spinner, "changed",
-                                  _edi_settings_project_agent_timeout_cb, NULL);
-
-   label = elm_label_add(table);
-   elm_object_text_set(label, _("Max AI edit steps"));
-   evas_object_size_hint_weight_set(label, 0.0, 0.0);
-   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
-   elm_table_pack(table, label, 0, 7, 1, 1);
-   evas_object_show(label);
-
-   spinner = elm_spinner_add(table);
-   elm_spinner_min_max_set(spinner, 1.0, 4096.0);
-   elm_spinner_step_set(spinner, 1.0);
-   elm_spinner_editable_set(spinner, EINA_TRUE);
-   elm_spinner_wrap_set(spinner, EINA_FALSE);
-   elm_spinner_value_set(spinner, _edi_project_config->agent.steps_max > 0 ?
-                                  _edi_project_config->agent.steps_max : 256);
-   evas_object_size_hint_weight_set(spinner, EVAS_HINT_EXPAND, 0.0);
-   evas_object_size_hint_align_set(spinner, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_table_pack(table, spinner, 1, 7, 1, 1);
-   evas_object_show(spinner);
-   evas_object_smart_callback_add(spinner, "changed",
-                                  _edi_settings_project_agent_steps_max_cb, NULL);
-
-   button = elm_button_add(table);
-   elm_object_text_set(button, _("Test Connection"));
-   evas_object_size_hint_weight_set(button, EVAS_HINT_EXPAND, 0.0);
-   evas_object_size_hint_align_set(button, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_table_pack(table, button, 1, 8, 1, 1);
-   evas_object_show(button);
-   evas_object_smart_callback_add(button, "clicked",
-                                  _edi_settings_project_agent_test_cb, button);
-
    scroller = elm_scroller_add(parent);
    elm_scroller_policy_set(scroller, ELM_SCROLLER_POLICY_OFF, ELM_SCROLLER_POLICY_AUTO);
    elm_scroller_bounce_set(scroller, EINA_FALSE, EINA_TRUE);
@@ -1606,11 +1682,11 @@ Evas_Object *
 edi_settings_show(Evas_Object *mainwin, Edi_Settings_Tab type)
 {
    Evas_Object *win, *bg, *table, *naviframe, *tb;
-   Elm_Object_Item *tb_it, *default_it;
-   Elm_Object_Item *it_project, *it_display, *it_behaviour, *it_builds;
+   Elm_Object_Item *tb_it, *default_it = NULL;
+   Elm_Object_Item *it_project, *it_display, *it_behaviour, *it_builds, *it_ai;
    Eina_Bool project_mode;
 
-   it_project = it_display = it_behaviour = it_builds = NULL;
+   it_project = it_display = it_behaviour = it_builds = it_ai = NULL;
 
    if (edi_settings_win_get())
      return NULL;
@@ -1661,6 +1737,9 @@ edi_settings_show(Evas_Object *mainwin, Edi_Settings_Tab type)
    _edi_settings_builds = elm_naviframe_item_push(naviframe, "", NULL, NULL,
                                                    _edi_settings_builds_create(naviframe), NULL);
    elm_naviframe_item_title_enabled_set(_edi_settings_builds, EINA_FALSE, EINA_FALSE);
+   _edi_settings_ai = elm_naviframe_item_push(naviframe, "", NULL, NULL,
+                                              _edi_settings_ai_create(naviframe), NULL);
+   elm_naviframe_item_title_enabled_set(_edi_settings_ai, EINA_FALSE, EINA_FALSE);
    _edi_settings_behaviour = elm_naviframe_item_push(naviframe, "", NULL, NULL,
                                                    _edi_settings_behaviour_create(naviframe), NULL);
    elm_naviframe_item_title_enabled_set(_edi_settings_behaviour, EINA_FALSE, EINA_FALSE);
@@ -1672,6 +1751,8 @@ edi_settings_show(Evas_Object *mainwin, Edi_Settings_Tab type)
      it_project = elm_toolbar_item_append(tb, "applications-development", _("Project"),_edi_settings_category_cb, _edi_settings_project);
    if (project_mode)
      it_builds = elm_toolbar_item_append(tb, "system-run", _("Builds"), _edi_settings_category_cb, _edi_settings_builds);
+   if (project_mode)
+     it_ai = elm_toolbar_item_append(tb, "applications-development", _("AI"), _edi_settings_category_cb, _edi_settings_ai);
 
    tb_it = elm_toolbar_item_append(tb, NULL, NULL, NULL, NULL);
    elm_toolbar_item_separator_set(tb_it, EINA_TRUE);
@@ -1695,6 +1776,9 @@ edi_settings_show(Evas_Object *mainwin, Edi_Settings_Tab type)
           break;
         case EDI_SETTINGS_TAB_BUILDS:
           default_it = it_builds;
+          break;
+        case EDI_SETTINGS_TAB_AI:
+          default_it = it_ai;
           break;
      }
 

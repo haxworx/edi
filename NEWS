@@ -19,6 +19,8 @@ Edi 0.9
  * SCM log browser with selectable commits and dedicated commit-change viewer.
  * SCM log browser is searchable by title, author and e-mail.
  * Make our about window scrolling, rolling, bowling.
+ * Unify popup styling.
+ * Add SCM tool to show file diffs (available from file selector).
  * ...
 
 =======

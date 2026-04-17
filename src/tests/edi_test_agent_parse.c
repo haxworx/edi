@@ -63,6 +63,34 @@ START_TEST(edi_test_agent_parse_openai_responses_delta)
 }
 END_TEST
 
+START_TEST(edi_test_agent_parse_openai_responses_unicode_escape)
+{
+   char *parsed;
+
+   parsed = edi_agent_response_parse_for_provider(
+      "openai_compatible",
+      "{\"type\":\"response.output_text.delta\",\"delta\":\"it\\u2019s done\"}");
+
+   ck_assert_ptr_nonnull(parsed);
+   ck_assert_str_eq(parsed, "it’s done");
+   free(parsed);
+}
+END_TEST
+
+START_TEST(edi_test_agent_parse_openai_responses_surrogate_pair)
+{
+   char *parsed;
+
+   parsed = edi_agent_response_parse_for_provider(
+      "openai_compatible",
+      "{\"type\":\"response.output_text.delta\",\"delta\":\"ok \\uD83D\\uDE80\"}");
+
+   ck_assert_ptr_nonnull(parsed);
+   ck_assert_str_eq(parsed, "ok 🚀");
+   free(parsed);
+}
+END_TEST
+
 START_TEST(edi_test_agent_parse_error_message)
 {
    char *parsed;
@@ -115,6 +143,8 @@ edi_test_agent_parse(TCase *tc)
    tcase_add_test(tc, edi_test_agent_parse_openai_response);
    tcase_add_test(tc, edi_test_agent_parse_openai_responses_output_text);
    tcase_add_test(tc, edi_test_agent_parse_openai_responses_delta);
+   tcase_add_test(tc, edi_test_agent_parse_openai_responses_unicode_escape);
+   tcase_add_test(tc, edi_test_agent_parse_openai_responses_surrogate_pair);
    tcase_add_test(tc, edi_test_agent_parse_error_message);
    tcase_add_test(tc, edi_test_agent_validate_rules);
 }

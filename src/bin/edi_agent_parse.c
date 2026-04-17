@@ -8,6 +8,72 @@
 
 #include "edi_agent_parse.h"
 
+static int
+_edi_agent_json_hex_to_int(char c)
+{
+   if (c >= '0' && c <= '9')
+     return c - '0';
+   if (c >= 'a' && c <= 'f')
+     return c - 'a' + 10;
+   if (c >= 'A' && c <= 'F')
+     return c - 'A' + 10;
+   return -1;
+}
+
+static Eina_Bool
+_edi_agent_json_u16_read(const char *src, unsigned int *value)
+{
+   int n0, n1, n2, n3;
+
+   if (!src || !value)
+     return EINA_FALSE;
+
+   n0 = _edi_agent_json_hex_to_int(src[0]);
+   n1 = _edi_agent_json_hex_to_int(src[1]);
+   n2 = _edi_agent_json_hex_to_int(src[2]);
+   n3 = _edi_agent_json_hex_to_int(src[3]);
+   if (n0 < 0 || n1 < 0 || n2 < 0 || n3 < 0)
+     return EINA_FALSE;
+
+   *value = ((unsigned int)n0 << 12) |
+            ((unsigned int)n1 << 8) |
+            ((unsigned int)n2 << 4) |
+            (unsigned int)n3;
+   return EINA_TRUE;
+}
+
+static void
+_edi_agent_json_utf8_append(Eina_Strbuf *buf, unsigned int cp)
+{
+   if (!buf)
+     return;
+
+   if (cp <= 0x7F)
+     {
+        eina_strbuf_append_char(buf, (char) cp);
+     }
+   else if (cp <= 0x7FF)
+     {
+        eina_strbuf_append_char(buf, (char)(0xC0 | ((cp >> 6) & 0x1F)));
+        eina_strbuf_append_char(buf, (char)(0x80 | (cp & 0x3F)));
+     }
+   else if (cp <= 0xFFFF)
+     {
+        eina_strbuf_append_char(buf, (char)(0xE0 | ((cp >> 12) & 0x0F)));
+        eina_strbuf_append_char(buf, (char)(0x80 | ((cp >> 6) & 0x3F)));
+        eina_strbuf_append_char(buf, (char)(0x80 | (cp & 0x3F)));
+     }
+   else if (cp <= 0x10FFFF)
+     {
+        eina_strbuf_append_char(buf, (char)(0xF0 | ((cp >> 18) & 0x07)));
+        eina_strbuf_append_char(buf, (char)(0x80 | ((cp >> 12) & 0x3F)));
+        eina_strbuf_append_char(buf, (char)(0x80 | ((cp >> 6) & 0x3F)));
+        eina_strbuf_append_char(buf, (char)(0x80 | (cp & 0x3F)));
+     }
+   else
+     eina_strbuf_append_char(buf, '?');
+}
+
 static char *
 _edi_agent_json_unescape(const char *src)
 {
@@ -25,14 +91,45 @@ _edi_agent_json_unescape(const char *src)
              c++;
              switch (*c)
                {
-                case 'n': eina_strbuf_append_char(buf, '\n'); break;
-                case 'r': eina_strbuf_append_char(buf, '\r'); break;
-                case 't': eina_strbuf_append_char(buf, '\t'); break;
-                case '\\': eina_strbuf_append_char(buf, '\\'); break;
-                case '"': eina_strbuf_append_char(buf, '"'); break;
-                default:
-                   eina_strbuf_append_char(buf, '\\');
-                   eina_strbuf_append_char(buf, *c);
+               case 'n': eina_strbuf_append_char(buf, '\n'); break;
+               case 'r': eina_strbuf_append_char(buf, '\r'); break;
+               case 't': eina_strbuf_append_char(buf, '\t'); break;
+               case '\\': eina_strbuf_append_char(buf, '\\'); break;
+               case '"': eina_strbuf_append_char(buf, '"'); break;
+               case 'u':
+                 {
+                    unsigned int hi;
+
+                    if (!_edi_agent_json_u16_read(c + 1, &hi))
+                      {
+                         eina_strbuf_append(buf, "\\u");
+                         break;
+                      }
+
+                    if (hi >= 0xD800 && hi <= 0xDBFF &&
+                        c[5] == '\\' && c[6] == 'u')
+                      {
+                         unsigned int lo;
+
+                         if (_edi_agent_json_u16_read(c + 7, &lo) &&
+                             lo >= 0xDC00 && lo <= 0xDFFF)
+                           {
+                              unsigned int cp;
+
+                              cp = 0x10000 + (((hi - 0xD800) << 10) | (lo - 0xDC00));
+                              _edi_agent_json_utf8_append(buf, cp);
+                              c += 10;
+                              break;
+                           }
+                      }
+
+                    _edi_agent_json_utf8_append(buf, hi);
+                    c += 4;
+                    break;
+                 }
+               default:
+                  eina_strbuf_append_char(buf, '\\');
+                  eina_strbuf_append_char(buf, *c);
                }
           }
         else
