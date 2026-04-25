@@ -46,6 +46,7 @@ typedef char *(scm_fn_diff)(Eina_Bool);
 typedef int (scm_fn_push)(void);
 typedef int (scm_fn_pull)(void);
 typedef int (scm_fn_stash)(void);
+typedef int (scm_fn_stash_pop)(void);
 typedef Edi_Scm_Status_Code (scm_fn_file_status)(const char *path);
 
 typedef int (scm_fn_remote_add)(const char *remote_url);
@@ -77,6 +78,7 @@ typedef struct _Edi_Scm_Engine
    scm_fn_push        *push;
    scm_fn_pull        *pull;
    scm_fn_stash       *stash;
+   scm_fn_stash_pop   *stash_pop;
 
    scm_fn_remote_add   *remote_add;
    scm_fn_remote_name  *remote_name_get;
@@ -314,6 +316,13 @@ EAPI void edi_scm_pull(void);
  * @ingroup Scm
  */
 EAPI void edi_scm_stash(void);
+
+/**
+ * Pop latest stash entry.
+ *
+ * @ingroup Scm
+ */
+EAPI void edi_scm_stash_pop(void);
 
 /**
  * Set remote url for SCM.

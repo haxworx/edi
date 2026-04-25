@@ -248,7 +248,7 @@ edi_mainview_open_window_path(const char *path)
    Edi_Path_Options *options;
 
    options = edi_path_options_create(path);
-// TODO this will not work right now - windows come from tabs so do we need it?
+
    edi_mainview_open_window(options);
 }
 
@@ -392,6 +392,33 @@ edi_mainview_paste()
    if (edi_mainview_is_empty()) return;
 
    edi_mainview_panel_paste(_current_panel);
+}
+
+void
+edi_mainview_select_all()
+{
+   Edi_Mainview_Item *item;
+   Edi_Editor *editor;
+   Elm_Code *code;
+
+   if (edi_mainview_is_empty()) return;
+
+   item = edi_mainview_item_current_get();
+   if (!item || !item->view)
+     return;
+
+   editor = (Edi_Editor *)evas_object_data_get(item->view, "editor");
+   if (!editor || !editor->entry)
+     return;
+
+   code = elm_code_widget_code_get(editor->entry);
+   if (!code || elm_code_file_lines_get(code->file) <= 0)
+     {
+        elm_object_focus_set(editor->entry, EINA_TRUE);
+        return;
+     }
+
+   edi_mainview_panel_select_all(_current_panel);
 }
 
 void
@@ -623,4 +650,3 @@ edi_mainview_add(Evas_Object *parent, Evas_Object *win)
    elm_box_horizontal_set(parent, EINA_TRUE);
    edi_mainview_panel_append();
 }
-

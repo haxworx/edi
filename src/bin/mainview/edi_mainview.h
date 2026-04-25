@@ -206,6 +206,13 @@ void edi_mainview_copy();
 void edi_mainview_paste();
 
 /**
+ * Select all content in the current view.
+ *
+ * @ingroup Content
+ */
+void edi_mainview_select_all();
+
+/**
  * Search the current view's contents.
  *
  * @ingroup Content

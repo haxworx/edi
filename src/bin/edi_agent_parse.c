@@ -1,3 +1,8 @@
+/*
+ * AI-assisted feature note:
+ * This provider-response parser was implemented with AI assistance and
+ * integrated into EDI by maintainers.
+ */
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -84,6 +89,7 @@ _edi_agent_json_unescape(const char *src)
    if (!src) return strdup("");
 
    buf = eina_strbuf_new();
+   /* Decode JSON escape sequences into plain UTF-8 text. */
    for (c = src; *c; c++)
      {
         if (*c == '\\' && *(c + 1))
@@ -142,6 +148,33 @@ _edi_agent_json_unescape(const char *src)
 }
 
 static char *
+_edi_agent_text_printable(const char *src)
+{
+   Eina_Strbuf *buf;
+   const unsigned char *c;
+   char *out;
+
+   if (!src)
+     return strdup("");
+
+   buf = eina_strbuf_new();
+   if (!buf)
+     return strdup(src);
+
+   for (c = (const unsigned char *)src; *c; c++)
+     {
+        if ((*c < 0x20 && *c != '\n' && *c != '\r' && *c != '\t') || *c == 0x7F)
+          eina_strbuf_append_printf(buf, "\\u%04x", (unsigned int)*c);
+        else
+          eina_strbuf_append_char(buf, (char)*c);
+     }
+
+   out = eina_strbuf_string_steal(buf);
+   eina_strbuf_free(buf);
+   return out;
+}
+
+static char *
 _edi_agent_json_first_string_value_get(const char *json, const char *key)
 {
    const char *p, *q;
@@ -151,6 +184,9 @@ _edi_agent_json_first_string_value_get(const char *json, const char *key)
    if (!json || !key) return NULL;
 
    p = json;
+   /* Minimal JSON scanner: find first quoted value for a key.
+    * This intentionally avoids a full JSON dependency in this path.
+    */
    while ((p = strstr(p, key)))
      {
         q = p + strlen(key);
@@ -193,6 +229,7 @@ char *
 edi_agent_error_parse_for_provider(const char *provider, const char *json, int http_code)
 {
    char *msg = NULL, *status = NULL, *type = NULL, *code = NULL;
+   char *msg_clean = NULL, *status_clean = NULL, *type_clean = NULL, *code_clean = NULL;
    Eina_Strbuf *buf;
    char *out;
 
@@ -200,30 +237,39 @@ edi_agent_error_parse_for_provider(const char *provider, const char *json, int h
      return strdup(eina_slstr_printf("%s request failed (HTTP %d).",
                                      provider ? provider : "Agent", http_code));
 
+   /* Pull common error fields used by OpenAI-style and compatible APIs. */
    msg = _edi_agent_json_first_string_value_get(json, "\"message\"");
    status = _edi_agent_json_first_string_value_get(json, "\"status\"");
    type = _edi_agent_json_first_string_value_get(json, "\"type\"");
    code = _edi_agent_json_first_string_value_get(json, "\"code\"");
+   msg_clean = _edi_agent_text_printable(msg);
+   status_clean = _edi_agent_text_printable(status);
+   type_clean = _edi_agent_text_printable(type);
+   code_clean = _edi_agent_text_printable(code);
 
-   if (!msg || !msg[0])
+   if (!msg_clean || !msg_clean[0])
      {
         free(msg);
         free(status);
         free(type);
         free(code);
+        free(msg_clean);
+        free(status_clean);
+        free(type_clean);
+        free(code_clean);
         return strdup(eina_slstr_printf("%s request failed (HTTP %d).",
                                         provider ? provider : "Agent", http_code));
      }
 
    buf = eina_strbuf_new();
    eina_strbuf_append_printf(buf, "%s request failed (HTTP %d): %s",
-                             provider ? provider : "Agent", http_code, msg);
-   if (status && status[0])
-     eina_strbuf_append_printf(buf, " [status=%s]", status);
-   if (type && type[0])
-     eina_strbuf_append_printf(buf, " [type=%s]", type);
-   if (code && code[0])
-     eina_strbuf_append_printf(buf, " [code=%s]", code);
+                             provider ? provider : "Agent", http_code, msg_clean);
+   if (status_clean && status_clean[0])
+     eina_strbuf_append_printf(buf, " [status=%s]", status_clean);
+   if (type_clean && type_clean[0])
+     eina_strbuf_append_printf(buf, " [type=%s]", type_clean);
+   if (code_clean && code_clean[0])
+     eina_strbuf_append_printf(buf, " [code=%s]", code_clean);
 
    out = eina_strbuf_string_steal(buf);
    eina_strbuf_free(buf);
@@ -231,6 +277,10 @@ edi_agent_error_parse_for_provider(const char *provider, const char *json, int h
    free(status);
    free(type);
    free(code);
+   free(msg_clean);
+   free(status_clean);
+   free(type_clean);
+   free(code_clean);
    return out;
 }
 
@@ -242,6 +292,7 @@ edi_agent_response_parse_for_provider(const char *provider, const char *json)
    if (!json || !json[0])
      return NULL;
 
+   /* Providers return text in different fields; try them in useful order. */
    if (provider && !strcmp(provider, "google_codex"))
      text = _edi_agent_json_first_string_value_get(json, "\"text\"");
    else

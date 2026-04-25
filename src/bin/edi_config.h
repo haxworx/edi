@@ -104,14 +104,12 @@ struct _Edi_Project_Config
    struct
      {
         Eina_Bool enabled;
-        Eina_Bool edits_enabled;
         Eina_Stringshare *provider;
         Eina_Stringshare *model;
         Eina_Stringshare *endpoint;
         Eina_Stringshare *api_key;
         Eina_Stringshare *project_id;
         double timeout_seconds;
-        int steps_max;
      } agent;
 
    Eina_List *panels;

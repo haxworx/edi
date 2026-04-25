@@ -1,3 +1,8 @@
+/*
+ * AI-assisted feature note:
+ * This public agent API was introduced for AI-assisted features and is
+ * maintained as part of EDI.
+ */
 #ifndef _EDI_AGENT_H_
 # define _EDI_AGENT_H_ 1
 
@@ -10,6 +15,7 @@ typedef struct _Edi_Agent_Models_Request Edi_Agent_Models_Request;
 
 typedef struct _Edi_Agent_Provider
 {
+   /* Stable provider identifier used in config and routing logic. */
    const char *id;
    const char *name;
    const char *default_endpoint;
@@ -23,7 +29,9 @@ typedef struct _Edi_Agent_Model_List
 } Edi_Agent_Model_List;
 
 typedef void (*Edi_Agent_Response_Cb)(const char *response, const char *error, void *data);
+/* Token callback is used for streaming providers (SSE/chunked text). */
 typedef void (*Edi_Agent_Token_Cb)(const char *token, void *data);
+/* Model callback may return remote models or static fallback models. */
 typedef void (*Edi_Agent_Models_Cb)(const char *provider_id,
                                     const char **models,
                                     unsigned int count,

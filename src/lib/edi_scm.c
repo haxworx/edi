@@ -537,6 +537,21 @@ _edi_scm_git_stash(void)
 }
 
 static int
+_edi_scm_git_stash_pop(void)
+{
+   int code;
+   Eina_Strbuf *command = eina_strbuf_new();
+
+   eina_strbuf_append(command, "git stash pop");
+
+   code = _edi_scm_exec(eina_strbuf_string_get(command));
+
+   eina_strbuf_free(command);
+
+   return code;
+}
+
+static int
 _edi_scm_git_remote_add(const char *remote_url)
 {
    int code;
@@ -891,6 +906,14 @@ edi_scm_stash(void)
    e->stash();
 }
 
+EAPI void
+edi_scm_stash_pop(void)
+{
+   Edi_Scm_Engine *e = edi_scm_engine_get();
+
+   e->stash_pop();
+}
+
 EAPI int
 edi_scm_credentials_set(const char *user, const char *email)
 {
@@ -967,6 +990,7 @@ _edi_scm_git_init(const char *rootdir)
    engine->pull = _edi_scm_git_pull;
    engine->push = _edi_scm_git_push;
    engine->stash = _edi_scm_git_stash;
+   engine->stash_pop = _edi_scm_git_stash_pop;
    engine->file_status = _edi_scm_git_file_status;
 
    engine->remote_add = _edi_scm_git_remote_add;

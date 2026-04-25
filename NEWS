@@ -13,7 +13,6 @@ Edi 0.9
  * Drag files between file panel and any panel.
  * Use new gravatar API in edi_scm.
  * Add AI Agents support with project-level provider settings and an AI panel.
- * AI can edit the project (beta), use this at your own risk!!!
  * Implement project and desktop notification status.
  * edi_scm_ui logger shows latest commit first.
  * SCM log browser with selectable commits and dedicated commit-change viewer.
@@ -21,7 +20,7 @@ Edi 0.9
  * Make our about window scrolling, rolling, bowling.
  * Unify popup styling.
  * Add SCM tool to show file diffs (available from file selector).
- * ...
+ * Add select all.
 
 =======
 Edi 0.8

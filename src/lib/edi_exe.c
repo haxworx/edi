@@ -2,7 +2,10 @@
 # include "config.h"
 #endif
 
+#include <ctype.h>
 #include <sys/wait.h>
+#include <unistd.h>
+#include <errno.h>
 
 #include <Ecore.h>
 #include <Ecore_File.h>
@@ -169,6 +172,262 @@ edi_exe_response(const char *command)
    out = strdup(eina_strbuf_string_get(lines));
 
    eina_strbuf_free(lines);
+
+   return out;
+}
+
+EAPI char *
+edi_exe_response_argv(const char *working_directory, char *const argv[], int *exit_code)
+{
+   int pipefd[2];
+   pid_t pid;
+   Eina_Strbuf *buf;
+   char chunk[4096];
+   ssize_t got;
+   int status = 0;
+   char *out;
+
+   if (exit_code)
+     *exit_code = -1;
+   if (!argv || !argv[0])
+     return NULL;
+
+   if (pipe(pipefd) < 0)
+     return NULL;
+
+   pid = fork();
+   if (pid < 0)
+     {
+        close(pipefd[0]);
+        close(pipefd[1]);
+        return NULL;
+     }
+
+   if (pid == 0)
+     {
+        if (working_directory && working_directory[0] &&
+            chdir(working_directory) != 0)
+          {
+             dprintf(STDERR_FILENO, "Failed to enter project directory: %s\n",
+                     strerror(errno));
+             _exit(126);
+          }
+
+        dup2(pipefd[1], STDOUT_FILENO);
+        dup2(pipefd[1], STDERR_FILENO);
+        close(pipefd[0]);
+        close(pipefd[1]);
+
+        execvp(argv[0], argv);
+        dprintf(STDERR_FILENO, "Failed to execute '%s': %s\n",
+                argv[0], strerror(errno));
+        _exit(errno == ENOENT ? 127 : 126);
+     }
+
+   close(pipefd[1]);
+   buf = eina_strbuf_new();
+   if (!buf)
+     {
+        close(pipefd[0]);
+        waitpid(pid, &status, 0);
+        return NULL;
+     }
+
+   while ((got = read(pipefd[0], chunk, sizeof(chunk))) > 0)
+     eina_strbuf_append_length(buf, chunk, got);
+   close(pipefd[0]);
+
+   if (waitpid(pid, &status, 0) < 0)
+     {
+        eina_strbuf_free(buf);
+        return NULL;
+     }
+
+   if (exit_code)
+     {
+        if (WIFEXITED(status))
+          *exit_code = WEXITSTATUS(status);
+        else if (WIFSIGNALED(status))
+          *exit_code = 128 + WTERMSIG(status);
+        else
+          *exit_code = -1;
+     }
+
+   out = eina_strbuf_string_steal(buf);
+   eina_strbuf_free(buf);
+   return out ?: strdup("");
+}
+
+static char **
+_edi_exe_command_argv_parse(const char *command, int *argc_out)
+{
+   const char *p;
+   char **argv = NULL;
+   int argc = 0;
+   int cap = 0;
+
+   if (argc_out)
+     *argc_out = 0;
+   if (!command || !command[0])
+     return NULL;
+
+   p = command;
+   while (*p)
+     {
+        Eina_Strbuf *arg;
+        Eina_Bool in_single = EINA_FALSE;
+        Eina_Bool in_double = EINA_FALSE;
+        char *out;
+
+        while (*p && isspace((unsigned char)*p))
+          p++;
+        if (!*p)
+          break;
+
+        arg = eina_strbuf_new();
+        if (!arg)
+          goto fail;
+
+        while (*p)
+          {
+             if (in_single)
+               {
+                  if (*p == '\'')
+                    {
+                       in_single = EINA_FALSE;
+                       p++;
+                       continue;
+                    }
+                  eina_strbuf_append_char(arg, *p++);
+                  continue;
+               }
+
+             if (in_double)
+               {
+                  if (*p == '"')
+                    {
+                       in_double = EINA_FALSE;
+                       p++;
+                       continue;
+                    }
+                  if (*p == '\\' && *(p + 1))
+                    {
+                       p++;
+                       eina_strbuf_append_char(arg, *p++);
+                       continue;
+                    }
+                  eina_strbuf_append_char(arg, *p++);
+                  continue;
+               }
+
+             if (isspace((unsigned char)*p))
+               break;
+             if (*p == '\'')
+               {
+                  in_single = EINA_TRUE;
+                  p++;
+                  continue;
+               }
+             if (*p == '"')
+               {
+                  in_double = EINA_TRUE;
+                  p++;
+                  continue;
+               }
+             if (*p == '\\' && *(p + 1))
+               {
+                  p++;
+                  eina_strbuf_append_char(arg, *p++);
+                  continue;
+               }
+
+             eina_strbuf_append_char(arg, *p++);
+          }
+
+        if (in_single || in_double)
+          {
+             eina_strbuf_free(arg);
+             goto fail;
+          }
+
+        out = eina_strbuf_string_steal(arg);
+        eina_strbuf_free(arg);
+        if (!out)
+          goto fail;
+
+        if (argc + 2 > cap)
+          {
+             int new_cap = cap ? (cap * 2) : 8;
+             char **next = realloc(argv, sizeof(char *) * new_cap);
+             if (!next)
+               {
+                  free(out);
+                  goto fail;
+               }
+             argv = next;
+             cap = new_cap;
+          }
+
+        argv[argc++] = out;
+     }
+
+   if (!argv || argc == 0)
+     goto fail;
+
+   argv[argc] = NULL;
+   if (argc_out)
+     *argc_out = argc;
+   return argv;
+
+fail:
+   if (argv)
+     {
+        int i;
+
+        for (i = 0; i < argc; i++)
+          free(argv[i]);
+        free(argv);
+     }
+   return NULL;
+}
+
+static void
+_edi_exe_command_argv_free(char **argv)
+{
+   int i;
+
+   if (!argv)
+     return;
+
+   for (i = 0; argv[i]; i++)
+     free(argv[i]);
+   free(argv);
+}
+
+EAPI char *
+edi_exe_response_command(const char *working_directory, const char *command, int *exit_code)
+{
+   char **argv = NULL;
+   int argc = 0;
+   char *out;
+
+   if (exit_code)
+     *exit_code = -1;
+
+   argv = _edi_exe_command_argv_parse(command, &argc);
+   if (!argv || argc == 0)
+     {
+        _edi_exe_command_argv_free(argv);
+        if (exit_code)
+          *exit_code = 2;
+        return strdup("Error: Invalid command format.");
+     }
+
+   out = edi_exe_response_argv(working_directory, argv, exit_code);
+   _edi_exe_command_argv_free(argv);
+
+   if (!out)
+     return strdup("Failed to run command.");
 
    return out;
 }

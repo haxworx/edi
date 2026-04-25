@@ -1,3 +1,8 @@
+/*
+ * AI-assisted feature note:
+ * This agent transport layer was created with AI assistance and integrated
+ * into EDI by maintainers.
+ */
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -16,8 +21,10 @@
 
 struct _Edi_Agent_Request
 {
+   /* Kind is first so callbacks can dispatch by reading url user-data as int*. */
    int kind;
    Ecore_Con_Url *url;
+   Ecore_Timer *timeout_timer;
    char *provider;
    char *endpoint;
    char *model;
@@ -35,9 +42,13 @@ struct _Edi_Agent_Request
 
 struct _Edi_Agent_Models_Request
 {
+   /* Kind is first so callbacks can dispatch by reading url user-data as int*. */
    int kind;
    Ecore_Con_Url *url;
+   Ecore_Timer *timeout_timer;
+   double timeout_seconds;
    char *provider;
+   char *endpoint;
    Eina_Strbuf *response_buf;
    Edi_Agent_Models_Cb cb;
    void *cb_data;
@@ -51,6 +62,7 @@ enum
 
 static const Edi_Agent_Provider _edi_agent_providers[] =
 {
+   /* Default endpoints/models are fallback values from config. */
    { "google_codex", "Google Codex", "https://generativelanguage.googleapis.com/v1beta/models", "gemini-2.5-flash" },
    { "local_http", "Local HTTP Agent", "http://127.0.0.1:11434/v1/responses", "qwen2.5-coder:latest" },
    { "microsoft_copilot", "Microsoft Copilot", "https://api.githubcopilot.com/v1/responses", "gpt-4.1-mini" },
@@ -92,11 +104,58 @@ static const char *_edi_agent_models_openai_compatible[] =
    "o4-mini"
 };
 
-static Ecore_Event_Handler *_url_data_hdl = NULL;
-static Ecore_Event_Handler *_url_complete_hdl = NULL;
-static Eina_Bool _url_inited = EINA_FALSE;
-static char *_edi_agent_prompt_suffix = NULL;
-static Eina_Bool _edi_agent_prompt_suffix_loaded = EINA_FALSE;
+typedef struct
+{
+   Ecore_Event_Handler *url_data_handler;
+   Ecore_Event_Handler *url_complete_handler;
+   Eina_Bool url_inited;
+   char *prompt_suffix;
+   Eina_Bool prompt_suffix_loaded;
+} Edi_Agent_Runtime;
+
+static Edi_Agent_Runtime _edi_agent_runtime = {0};
+
+static char *
+_edi_agent_transport_error_build(const char *provider, const char *endpoint, int status)
+{
+   Eina_Strbuf *buf;
+   char *out;
+
+   buf = eina_strbuf_new();
+   if (!buf)
+     return strdup("Network connection failed before receiving a response.");
+
+   eina_strbuf_append_printf(buf,
+                             "Network connection failed before receiving a response.\n\n"
+                             "Provider: %s\nEndpoint: %s\nStatus: %d",
+                             provider ? provider : "(none)",
+                             endpoint ? endpoint : "(none)",
+                             status);
+   out = eina_strbuf_string_steal(buf);
+   eina_strbuf_free(buf);
+   return out;
+}
+
+static char *
+_edi_agent_timeout_error_build(const char *provider, const char *endpoint, double timeout_seconds)
+{
+   Eina_Strbuf *buf;
+   char *out;
+
+   buf = eina_strbuf_new();
+   if (!buf)
+     return strdup("Network request timed out before receiving a response.");
+
+   eina_strbuf_append_printf(buf,
+                             "Network request timed out before receiving a response.\n\n"
+                             "Provider: %s\nEndpoint: %s\nTimeout: %.1fs",
+                             provider ? provider : "(none)",
+                             endpoint ? endpoint : "(none)",
+                             timeout_seconds > 0.0 ? timeout_seconds : EDI_AGENT_DEFAULT_TIMEOUT);
+   out = eina_strbuf_string_steal(buf);
+   eina_strbuf_free(buf);
+   return out;
+}
 
 static char *
 _edi_agent_file_read_all(const char *path)
@@ -149,14 +208,14 @@ _edi_agent_file_read_all(const char *path)
 static const char *
 _edi_agent_prompt_suffix_get(void)
 {
-   if (_edi_agent_prompt_suffix_loaded)
-     return _edi_agent_prompt_suffix ?: "";
+   if (_edi_agent_runtime.prompt_suffix_loaded)
+     return _edi_agent_runtime.prompt_suffix ?: "";
 
-   _edi_agent_prompt_suffix_loaded = EINA_TRUE;
-   _edi_agent_prompt_suffix =
+   _edi_agent_runtime.prompt_suffix_loaded = EINA_TRUE;
+   _edi_agent_runtime.prompt_suffix =
       _edi_agent_file_read_all(PACKAGE_DATA_DIR "/prompts/agent_prompt_suffix.txt");
 
-   return _edi_agent_prompt_suffix ?: "";
+   return _edi_agent_runtime.prompt_suffix ?: "";
 }
 
 static Edi_Agent_Model_List
@@ -307,6 +366,7 @@ _edi_agent_models_parse_json(const char *provider_id, const char *json,
    if (!json || !json[0])
      return EINA_FALSE;
 
+   /* Providers usually expose model identifiers as "id". */
    p = json;
    while ((p = strstr(p, "\"id\"")))
      {
@@ -320,6 +380,7 @@ _edi_agent_models_parse_json(const char *provider_id, const char *json,
         free(name);
      }
 
+   /* Some providers use "name" instead; collect both and dedupe. */
    p = json;
    while ((p = strstr(p, "\"name\"")))
      {
@@ -471,6 +532,7 @@ static void
 _edi_agent_request_free(Edi_Agent_Request *req)
 {
    if (!req) return;
+   if (req->timeout_timer) ecore_timer_del(req->timeout_timer);
    if (req->url) ecore_con_url_free(req->url);
    if (req->response_buf) eina_strbuf_free(req->response_buf);
    if (req->sse_buf) eina_strbuf_free(req->sse_buf);
@@ -485,9 +547,11 @@ static void
 _edi_agent_models_request_free(Edi_Agent_Models_Request *req)
 {
    if (!req) return;
+   if (req->timeout_timer) ecore_timer_del(req->timeout_timer);
    if (req->url) ecore_con_url_free(req->url);
    if (req->response_buf) eina_strbuf_free(req->response_buf);
    free(req->provider);
+   free(req->endpoint);
    free(req);
 }
 
@@ -512,6 +576,7 @@ _edi_agent_models_url_build(const Edi_Project_Config *config, const char *provid
    url = eina_strbuf_new();
    eina_strbuf_append(url, endpoint);
 
+   /* Normalize provider-specific base endpoints into concrete model-list URLs. */
    if (!strcmp(provider_id, "google_codex"))
      {
         marker = strstr(eina_strbuf_string_get(url), ":generateContent");
@@ -594,6 +659,7 @@ _edi_agent_parse_sse(Edi_Agent_Request *req)
 
    all = eina_strbuf_string_get(req->sse_buf);
    line_start = all;
+   /* Parse SSE by lines and emit only parsed text deltas. */
    while ((newline = strchr(line_start, '\n')))
      {
         int len = newline - line_start;
@@ -647,6 +713,73 @@ next_line:
 }
 
 static Eina_Bool
+_edi_agent_models_timeout_cb(void *data)
+{
+   Edi_Agent_Models_Request *models_req = data;
+   Edi_Agent_Model_List fallback = {0};
+   char **models = NULL;
+   unsigned int model_count = 0;
+   char *error = NULL;
+
+   if (!models_req)
+     return ECORE_CALLBACK_CANCEL;
+
+   models_req->timeout_timer = NULL;
+   if (models_req->url)
+     {
+        ecore_con_url_data_set(models_req->url, NULL);
+        ecore_con_url_free(models_req->url);
+        models_req->url = NULL;
+     }
+
+   fallback = _edi_agent_provider_models_for_id_get(models_req->provider);
+   _edi_agent_models_clone(models_req->provider, fallback.models, fallback.count,
+                           &models, &model_count);
+
+   error = _edi_agent_timeout_error_build(models_req->provider,
+                                          models_req->endpoint,
+                                          models_req->timeout_seconds);
+   if (models_req->cb)
+     models_req->cb(models_req->provider, (const char **)models, model_count,
+                    EINA_FALSE, error, models_req->cb_data);
+   else
+     edi_agent_models_free((const char **)models, model_count);
+
+   free(error);
+   _edi_agent_models_request_free(models_req);
+   return ECORE_CALLBACK_CANCEL;
+}
+
+static Eina_Bool
+_edi_agent_request_timeout_cb(void *data)
+{
+   Edi_Agent_Request *req = data;
+   char *error;
+
+   if (!req)
+     return ECORE_CALLBACK_CANCEL;
+
+   req->timeout_timer = NULL;
+   if (req->url)
+     {
+        ecore_con_url_data_set(req->url, NULL);
+        ecore_con_url_free(req->url);
+        req->url = NULL;
+     }
+
+   error = _edi_agent_timeout_error_build(req->provider, req->endpoint,
+                                          (_edi_project_config && _edi_project_config->agent.timeout_seconds > 0.0)
+                                          ? _edi_project_config->agent.timeout_seconds
+                                          : EDI_AGENT_DEFAULT_TIMEOUT);
+   if (req->done_cb)
+     req->done_cb(NULL, error, req->cb_data);
+   free(error);
+
+   _edi_agent_request_free(req);
+   return ECORE_CALLBACK_CANCEL;
+}
+
+static Eina_Bool
 _edi_agent_url_data_cb(void *data EINA_UNUSED, int type EINA_UNUSED, void *event)
 {
    Ecore_Con_Event_Url_Data *ev = event;
@@ -656,28 +789,49 @@ _edi_agent_url_data_cb(void *data EINA_UNUSED, int type EINA_UNUSED, void *event
 
    if (!ev || !ev->url_con) return ECORE_CALLBACK_RENEW;
 
+   /* url user-data points to either request struct; both start with `kind`. */
    kind_ptr = ecore_con_url_data_get(ev->url_con);
    if (!kind_ptr) return ECORE_CALLBACK_RENEW;
 
    if (*kind_ptr == EDI_AGENT_URL_KIND_MODEL_LIST)
      {
+        /* Model list requests buffer raw JSON until completion. */
         models_req = (Edi_Agent_Models_Request *)kind_ptr;
         if (!models_req->response_buf)
-          models_req->response_buf = eina_strbuf_new();
-        eina_strbuf_append_length(models_req->response_buf, (const char *)ev->data, ev->size);
+          {
+             models_req->response_buf = eina_strbuf_new();
+             if (!models_req->response_buf)
+               return ECORE_CALLBACK_RENEW;
+          }
+        if (ev->size > 0)
+          eina_strbuf_append_length(models_req->response_buf, (const char *)ev->data, ev->size);
         return ECORE_CALLBACK_RENEW;
      }
 
    req = (Edi_Agent_Request *)kind_ptr;
    if (req->stream && req->token_cb)
      {
-        if (!req->sse_buf) req->sse_buf = eina_strbuf_new();
-        eina_strbuf_append_length(req->sse_buf, (const char *)ev->data, ev->size);
+        /* Streaming responses are parsed incrementally from SSE chunks. */
+        if (!req->sse_buf)
+          {
+             req->sse_buf = eina_strbuf_new();
+             if (!req->sse_buf)
+               return ECORE_CALLBACK_RENEW;
+          }
+        if (ev->size > 0)
+          eina_strbuf_append_length(req->sse_buf, (const char *)ev->data, ev->size);
         _edi_agent_parse_sse(req);
      }
    else
      {
-        eina_strbuf_append_length(req->response_buf, (const char *)ev->data, ev->size);
+        if (!req->response_buf)
+          {
+             req->response_buf = eina_strbuf_new();
+             if (!req->response_buf)
+               return ECORE_CALLBACK_RENEW;
+          }
+        if (ev->size > 0)
+          eina_strbuf_append_length(req->response_buf, (const char *)ev->data, ev->size);
      }
 
    return ECORE_CALLBACK_RENEW;
@@ -700,15 +854,22 @@ _edi_agent_url_complete_cb(void *data EINA_UNUSED, int type EINA_UNUSED, void *e
 
    if (!ev || !ev->url_con) return ECORE_CALLBACK_RENEW;
 
+   /* url user-data points to either request struct; both start with `kind`. */
    kind_ptr = ecore_con_url_data_get(ev->url_con);
    if (!kind_ptr) return ECORE_CALLBACK_RENEW;
 
    if (*kind_ptr == EDI_AGENT_URL_KIND_MODEL_LIST)
      {
+        /* For model discovery, prefer remote parse and fall back to static list. */
         models_req = (Edi_Agent_Models_Request *)kind_ptr;
+        if (models_req->timeout_timer)
+          {
+             ecore_timer_del(models_req->timeout_timer);
+             models_req->timeout_timer = NULL;
+          }
         raw = models_req->response_buf ? eina_strbuf_string_get(models_req->response_buf) : "";
 
-        if (ev->status < 400)
+        if (ev->status > 0 && ev->status < 400)
           from_remote = _edi_agent_models_parse_json(models_req->provider, raw, &models, &model_count);
 
         if (!from_remote)
@@ -720,7 +881,9 @@ _edi_agent_url_complete_cb(void *data EINA_UNUSED, int type EINA_UNUSED, void *e
 
         if (models_req->cb)
           {
-             if (!from_remote && ev->status >= 400)
+             if (!from_remote && ev->status <= 0)
+               error = _edi_agent_transport_error_build(models_req->provider, NULL, ev->status);
+             else if (!from_remote && ev->status >= 400)
                error = edi_agent_error_parse_for_provider(models_req->provider, raw, ev->status);
              models_req->cb(models_req->provider, (const char **)models, model_count,
                             from_remote, error, models_req->cb_data);
@@ -736,9 +899,18 @@ _edi_agent_url_complete_cb(void *data EINA_UNUSED, int type EINA_UNUSED, void *e
      }
 
    req = (Edi_Agent_Request *)kind_ptr;
+   if (req->timeout_timer)
+     {
+        ecore_timer_del(req->timeout_timer);
+        req->timeout_timer = NULL;
+     }
 
-   raw = eina_strbuf_string_get(req->response_buf);
-   if (ev->status >= 400)
+   raw = req->response_buf ? eina_strbuf_string_get(req->response_buf) : "";
+   if (ev->status <= 0)
+     {
+        error = _edi_agent_transport_error_build(req->provider, req->endpoint, ev->status);
+     }
+   else if (ev->status >= 400)
      {
         Eina_Strbuf *buf;
         char *parsed;
@@ -774,11 +946,14 @@ _edi_agent_url_complete_cb(void *data EINA_UNUSED, int type EINA_UNUSED, void *e
 static void
 _edi_agent_runtime_ensure(void)
 {
-   if (_url_inited) return;
+   if (_edi_agent_runtime.url_inited) return;
+   /* One-time network runtime + global URL event handlers. */
    ecore_con_url_init();
-   _url_data_hdl = ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA, _edi_agent_url_data_cb, NULL);
-   _url_complete_hdl = ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE, _edi_agent_url_complete_cb, NULL);
-   _url_inited = EINA_TRUE;
+   _edi_agent_runtime.url_data_handler =
+      ecore_event_handler_add(ECORE_CON_EVENT_URL_DATA, _edi_agent_url_data_cb, NULL);
+   _edi_agent_runtime.url_complete_handler =
+      ecore_event_handler_add(ECORE_CON_EVENT_URL_COMPLETE, _edi_agent_url_complete_cb, NULL);
+   _edi_agent_runtime.url_inited = EINA_TRUE;
 }
 
 const Edi_Agent_Provider *
@@ -850,6 +1025,9 @@ edi_agent_provider_models_fetch(const Edi_Project_Config *config, const char *pr
    const Edi_Agent_Provider *provider;
    char *api_key_clean;
    const char *api_key = NULL;
+   char *endpoint_clean;
+   const char *endpoint;
+   double timeout_seconds;
    char *url;
 
    provider = edi_agent_provider_by_id(provider_id);
@@ -858,11 +1036,17 @@ edi_agent_provider_models_fetch(const Edi_Project_Config *config, const char *pr
    api_key_clean = _edi_agent_config_value_clean(config ? config->agent.api_key : NULL);
    if (api_key_clean && api_key_clean[0])
      api_key = api_key_clean;
+   endpoint_clean = _edi_agent_config_value_clean(config ? config->agent.endpoint : NULL);
+   endpoint = (endpoint_clean && endpoint_clean[0]) ? endpoint_clean : provider->default_endpoint;
+   timeout_seconds = (config && config->agent.timeout_seconds > 0.0)
+                     ? config->agent.timeout_seconds
+                     : EDI_AGENT_DEFAULT_TIMEOUT;
 
    url = _edi_agent_models_url_build(config, provider->id, provider, api_key);
    if (!url)
      {
         free(api_key_clean);
+        free(endpoint_clean);
         return NULL;
      }
 
@@ -871,14 +1055,25 @@ edi_agent_provider_models_fetch(const Edi_Project_Config *config, const char *pr
      {
         free(url);
         free(api_key_clean);
+        free(endpoint_clean);
         return NULL;
      }
 
    req->kind = EDI_AGENT_URL_KIND_MODEL_LIST;
    req->provider = strdup(provider->id);
+   req->endpoint = strdup(endpoint ? endpoint : "");
+   req->timeout_seconds = timeout_seconds;
    req->cb = cb;
    req->cb_data = data;
    req->response_buf = eina_strbuf_new();
+   if (!req->provider || !req->endpoint || !req->response_buf)
+     {
+        _edi_agent_models_request_free(req);
+        free(url);
+        free(api_key_clean);
+        free(endpoint_clean);
+        return NULL;
+     }
 
    req->url = ecore_con_url_new(url);
    if (!req->url)
@@ -886,14 +1081,12 @@ edi_agent_provider_models_fetch(const Edi_Project_Config *config, const char *pr
         _edi_agent_models_request_free(req);
         free(url);
         free(api_key_clean);
+        free(endpoint_clean);
         return NULL;
      }
 
    ecore_con_url_data_set(req->url, req);
-   ecore_con_url_timeout_set(req->url,
-                             (config && config->agent.timeout_seconds > 0.0)
-                             ? config->agent.timeout_seconds
-                             : EDI_AGENT_DEFAULT_TIMEOUT);
+   ecore_con_url_timeout_set(req->url, timeout_seconds);
    ecore_con_url_additional_header_add(req->url, "Accept", "application/json");
 
    if (strcmp(provider->id, "google_codex") && api_key)
@@ -905,9 +1098,14 @@ edi_agent_provider_models_fetch(const Edi_Project_Config *config, const char *pr
         _edi_agent_models_request_free(req);
         req = NULL;
      }
+   else
+     {
+        req->timeout_timer = ecore_timer_add(timeout_seconds, _edi_agent_models_timeout_cb, req);
+     }
 
    free(url);
    free(api_key_clean);
+   free(endpoint_clean);
    return req;
 }
 
@@ -920,6 +1118,11 @@ edi_agent_provider_models_fetch_cancel(Edi_Agent_Models_Request *request)
    ecore_con_url_data_set(request->url, NULL);
    ecore_con_url_free(request->url);
    request->url = NULL;
+   if (request->timeout_timer)
+     {
+        ecore_timer_del(request->timeout_timer);
+        request->timeout_timer = NULL;
+     }
    _edi_agent_models_request_free(request);
    return EINA_TRUE;
 }
@@ -929,7 +1132,7 @@ edi_agent_provider_configured_get(const Edi_Project_Config *config)
 {
    const Edi_Agent_Provider *provider;
 
-   if (!config || !config->agent.enabled) return EINA_FALSE;
+   if (!config->agent.enabled) return EINA_FALSE;
    provider = edi_agent_provider_by_id(config->agent.provider);
    if (!strcmp(provider->id, "local_http"))
      return EINA_TRUE;
@@ -984,6 +1187,12 @@ edi_agent_request_send_stream(const char *prompt, Edi_Agent_Token_Cb token_cb,
    if (!prompt || !prompt[0] || !done_cb)
      return NULL;
 
+   if (!_edi_project_config)
+     {
+        done_cb(NULL, "AI agent is not configured.", data);
+        return NULL;
+     }
+
    validation_error = edi_agent_provider_validate(_edi_project_config);
    if (validation_error)
      {
@@ -1006,6 +1215,7 @@ edi_agent_request_send_stream(const char *prompt, Edi_Agent_Token_Cb token_cb,
    project_id = (project_id_clean && project_id_clean[0]) ? project_id_clean : NULL;
    provider_id = provider->id;
 
+   /* Auto-route to OpenAI-compatible mode when endpoint shape indicates it. */
    if (!strcmp(provider_id, "google_codex") && endpoint &&
       (strstr(endpoint, "api.openai.com/") ||
        strstr(endpoint, "/chat/completions") ||
@@ -1016,6 +1226,11 @@ edi_agent_request_send_stream(const char *prompt, Edi_Agent_Token_Cb token_cb,
      model = edi_agent_provider_model_default_get(provider_id);
 
    req = calloc(1, sizeof(*req));
+   if (!req)
+     {
+        done_cb(NULL, "Failed to allocate request.", data);
+        goto done;
+     }
    req->kind = EDI_AGENT_URL_KIND_REQUEST;
    req->provider = strdup(provider_id);
    req->endpoint = strdup(endpoint ? endpoint : "");
@@ -1025,6 +1240,13 @@ edi_agent_request_send_stream(const char *prompt, Edi_Agent_Token_Cb token_cb,
    req->cb_data = data;
    req->stream = (token_cb && strcmp(provider_id, "google_codex"));
    req->response_buf = eina_strbuf_new();
+   if (!req->provider || !req->endpoint || !req->model || !req->response_buf)
+     {
+        done_cb(NULL, "Failed to allocate request resources.", data);
+        _edi_agent_request_free(req);
+        req = NULL;
+        goto done;
+     }
 
    url = eina_strbuf_new();
    payload = eina_strbuf_new();
@@ -1035,6 +1257,7 @@ edi_agent_request_send_stream(const char *prompt, Edi_Agent_Token_Cb token_cb,
 
    if (!strcmp(provider_id, "google_codex"))
      {
+        /* Google endpoint format differs from Responses API shape. */
         eina_strbuf_append(url, endpoint);
         if (!strstr(endpoint, ":generateContent"))
           eina_strbuf_append_printf(url, "/%s:generateContent", model_esc);
@@ -1051,6 +1274,7 @@ edi_agent_request_send_stream(const char *prompt, Edi_Agent_Token_Cb token_cb,
      {
         const char *marker;
 
+        /* OpenAI-compatible providers are unified on /responses payloads. */
         eina_strbuf_append(url, endpoint);
         marker = strstr(eina_strbuf_string_get(url), "/v1/chat/completions");
         if (marker)
@@ -1114,6 +1338,10 @@ edi_agent_request_send_stream(const char *prompt, Edi_Agent_Token_Cb token_cb,
    else
      {
         req->payload_len = strlen(req->payload);
+        req->timeout_timer = ecore_timer_add(((_edi_project_config->agent.timeout_seconds > 0.0)
+                                              ? _edi_project_config->agent.timeout_seconds
+                                              : EDI_AGENT_DEFAULT_TIMEOUT),
+                                             _edi_agent_request_timeout_cb, req);
      }
 
 done:
@@ -1137,6 +1365,11 @@ edi_agent_request_cancel(Edi_Agent_Request *request)
    ecore_con_url_data_set(request->url, NULL);
    ecore_con_url_free(request->url);
    request->url = NULL;
+   if (request->timeout_timer)
+     {
+        ecore_timer_del(request->timeout_timer);
+        request->timeout_timer = NULL;
+     }
    if (request->done_cb)
      request->done_cb(NULL, "Request cancelled.", request->cb_data);
    _edi_agent_request_free(request);

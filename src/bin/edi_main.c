@@ -51,7 +51,7 @@ static const char *_edi_filepanel_selected_path;
 static Evas_Object *_edi_toolbar_save, *_edi_toolbar_undo, *_edi_toolbar_redo, *_edi_toolbar_build, *_edi_toolbar_test, *_edi_toolbar_clean;
 static Evas_Object *_edi_toolbar_run, *_edi_toolbar_terminate, *_edi_toolbar_hbx, *_edi_toolbar_vbx, *_edi_toolbar_main_box;
 static Evas_Object *_edi_menu_save, *_edi_menu_undo, *_edi_menu_redo, *_edi_menu_build, *_edi_menu_clean, *_edi_menu_test, *_edi_menu_run, *_edi_menu_log;
-static Evas_Object *_edi_menu_init, *_edi_menu_commit, *_edi_menu_push, *_edi_menu_pull, *_edi_menu_status, *_edi_menu_stash, *_edi_menu_terminate;
+static Evas_Object *_edi_menu_init, *_edi_menu_commit, *_edi_menu_push, *_edi_menu_pull, *_edi_menu_status, *_edi_menu_stash, *_edi_menu_stash_pop, *_edi_menu_terminate;
 static Evas_Object *_edi_main_win, *_edi_main_box;
 static Eina_Bool _edi_toolbar_is_horizontal, _edi_toolbar_text_visible;
 
@@ -701,6 +701,7 @@ _edi_icon_update()
         elm_object_item_disabled_set(_edi_menu_log, !can_scm);
         elm_object_item_disabled_set(_edi_menu_commit, !can_scm);
         elm_object_item_disabled_set(_edi_menu_stash, !can_scm);
+        elm_object_item_disabled_set(_edi_menu_stash_pop, !can_scm);
      }
 }
 
@@ -1120,6 +1121,13 @@ _edi_menu_paste_cb(void *data EINA_UNUSED, Evas_Object *obj EINA_UNUSED,
 }
 
 static void
+_edi_menu_select_all_cb(void *data EINA_UNUSED, Evas_Object *obj EINA_UNUSED,
+                        void *event_info EINA_UNUSED)
+{
+   edi_mainview_select_all();
+}
+
+static void
 _edi_menu_find_cb(void *data EINA_UNUSED, Evas_Object *obj EINA_UNUSED,
                   void *event_info EINA_UNUSED)
 {
@@ -1292,6 +1300,7 @@ _edi_menu_scm_commit_cb(void *data EINA_UNUSED, Evas_Object *obj EINA_UNUSED,
 static void
 _edi_scm_stash_do_cb(void *data EINA_UNUSED)
 {
+   edi_consolepanel_show();
    edi_scm_stash();
    edi_filepanel_status_refresh();
 }
@@ -1302,6 +1311,15 @@ _edi_menu_scm_stash_cb(void *data EINA_UNUSED, Evas_Object *obj EINA_UNUSED,
 {
    edi_screens_message_confirm(_edi_main_win, _("Are you sure you wish to stash these changes?"),
                                _edi_scm_stash_do_cb, NULL);
+}
+
+static void
+_edi_menu_scm_stash_pop_cb(void *data EINA_UNUSED, Evas_Object *obj EINA_UNUSED,
+                           void *event_info EINA_UNUSED)
+{
+   edi_consolepanel_show();
+   edi_scm_stash_pop();
+   edi_filepanel_status_refresh();
 }
 
 static void
@@ -1387,6 +1405,7 @@ _edi_menu_setup(Evas_Object *win)
    elm_menu_item_add(menu, menu_it, edi_theme_icon_path_get("edit-cut"), _("Cut"), _edi_menu_cut_cb, NULL);
    elm_menu_item_add(menu, menu_it, edi_theme_icon_path_get("edit-copy"), _("Copy"), _edi_menu_copy_cb, NULL);
    elm_menu_item_add(menu, menu_it, edi_theme_icon_path_get("edit-paste"), _("Paste"), _edi_menu_paste_cb, NULL);
+   elm_menu_item_add(menu, menu_it, edi_theme_icon_path_get("edit-select-all"), _("Select All"), _edi_menu_select_all_cb, NULL);
    elm_menu_item_separator_add(menu, menu_it);
    elm_menu_item_add(menu, menu_it, edi_theme_icon_path_get("edit-find-replace"), _("Find & Replace"), _edi_menu_find_cb, NULL);
    elm_menu_item_add(menu, menu_it, edi_theme_icon_path_get("edit-find"), _("Find file"), _edi_menu_findfile_cb, NULL);
@@ -1423,6 +1442,7 @@ _edi_menu_setup(Evas_Object *win)
         _edi_menu_init = elm_menu_item_add(menu, menu_it, edi_theme_icon_path_get("media-playback-start"), _("Init"), _edi_menu_scm_init_cb, NULL);
         _edi_menu_commit = elm_menu_item_add(menu, menu_it, edi_theme_icon_path_get("mail-send"), _("Commit"), _edi_menu_scm_commit_cb, NULL);
         _edi_menu_stash = elm_menu_item_add(menu, menu_it, edi_theme_icon_path_get("edit-undo"), _("Stash"), _edi_menu_scm_stash_cb, NULL);
+        _edi_menu_stash_pop = elm_menu_item_add(menu, menu_it, edi_theme_icon_path_get("edit-redo"), _("Stash Pop"), _edi_menu_scm_stash_pop_cb, NULL);
         elm_menu_item_separator_add(menu, menu_it);
         _edi_menu_status = elm_menu_item_add(menu, menu_it, edi_theme_icon_path_get("dialog-error"), _("Status"), _edi_menu_scm_status_cb, NULL);
         _edi_menu_log = elm_menu_item_add(menu, menu_it, edi_theme_icon_path_get("dialog-information"), _("Log"), _edi_menu_scm_log_cb, NULL);

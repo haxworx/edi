@@ -41,7 +41,7 @@
    ((EDI_CONFIG_FILE_EPOCH << 16) | EDI_CONFIG_FILE_GENERATION)
 
 #  define EDI_PROJECT_CONFIG_FILE_EPOCH 0x0002
-#  define EDI_PROJECT_CONFIG_FILE_GENERATION 0x000b
+#  define EDI_PROJECT_CONFIG_FILE_GENERATION 0x000e
 #  define EDI_PROJECT_CONFIG_FILE_VERSION \
    ((EDI_PROJECT_CONFIG_FILE_EPOCH << 16) | EDI_PROJECT_CONFIG_FILE_GENERATION)
 
@@ -307,14 +307,12 @@ _edi_config_init(void)
    EDI_CONFIG_VAL(D, T, user_fullname, EET_T_STRING);
    EDI_CONFIG_VAL(D, T, user_email, EET_T_STRING);
    EDI_CONFIG_VAL(D, T, agent.enabled, EET_T_UCHAR);
-   EDI_CONFIG_VAL(D, T, agent.edits_enabled, EET_T_UCHAR);
    EDI_CONFIG_VAL(D, T, agent.provider, EET_T_STRING);
    EDI_CONFIG_VAL(D, T, agent.model, EET_T_STRING);
    EDI_CONFIG_VAL(D, T, agent.endpoint, EET_T_STRING);
    EDI_CONFIG_VAL(D, T, agent.api_key, EET_T_STRING);
    EDI_CONFIG_VAL(D, T, agent.project_id, EET_T_STRING);
    EDI_CONFIG_VAL(D, T, agent.timeout_seconds, EET_T_DOUBLE);
-   EDI_CONFIG_VAL(D, T, agent.steps_max, EET_T_INT);
 
    EDI_CONFIG_LIST(D, T, panels, _edi_proj_cfg_panel_edd);
    EDI_CONFIG_LIST(D, T, windows, _edi_proj_cfg_tab_edd);
@@ -588,12 +586,20 @@ _edi_project_config_load()
    _edi_project_config->agent.timeout_seconds = 30.0;
    IFPCFGEND;
 
-   IFPCFG(0x000a);
-   _edi_project_config->agent.edits_enabled = EINA_FALSE;
+   IFPCFG(0x000b);
+   /* Reserved migration step. */
    IFPCFGEND;
 
-   IFPCFG(0x000b);
-   _edi_project_config->agent.steps_max = 256;
+   IFPCFG(0x000c);
+   /* Reserved migration step. */
+   IFPCFGEND;
+
+   IFPCFG(0x000d);
+   /* Reserved migration step. */
+   IFPCFGEND;
+
+   IFPCFG(0x000e);
+   /* Reserved migration step. */
    IFPCFGEND;
 
    /* limit config values so they are sane */
@@ -603,7 +609,6 @@ _edi_project_config_load()
    EDI_CONFIG_LIMIT(_edi_project_config->gui.leftsize, 0.0, 1.0);
    EDI_CONFIG_LIMIT(_edi_project_config->gui.bottomsize, 0.0, 1.0);
    EDI_CONFIG_LIMIT(_edi_project_config->gui.tabstop, 1, 32);
-   EDI_CONFIG_LIMIT(_edi_project_config->agent.steps_max, 1, 4096);
 
    _edi_project_config->version = EDI_PROJECT_CONFIG_FILE_VERSION;
 

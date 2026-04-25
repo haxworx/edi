@@ -41,6 +41,32 @@ EAPI int edi_exe_wait(const char *command);
 EAPI char *edi_exe_response(const char *command);
 
 /**
+ * Run an executable command directly (without invoking a shell) and return
+ * captured stdout/stderr.
+ *
+ * @param working_directory Directory to run the command in, or NULL for current.
+ * @param argv Null-terminated argument vector where argv[0] is the executable.
+ * @param exit_code Optional output for process exit code.
+ * @return Captured output string, or NULL on internal failure.
+ *
+ * @ingroup Exe
+ */
+EAPI char *edi_exe_response_argv(const char *working_directory, char *const argv[], int *exit_code);
+
+/**
+ * Parse a command string into argv form (without shell evaluation), execute it
+ * and return captured stdout/stderr.
+ *
+ * @param working_directory Directory to run the command in, or NULL for current.
+ * @param command Command string to parse into argv.
+ * @param exit_code Optional output for process exit code.
+ * @return Captured output string, or an error string on parse/launch failure.
+ *
+ * @ingroup Exe
+ */
+EAPI char *edi_exe_response_command(const char *working_directory, const char *command, int *exit_code);
+
+/**
  * Run an executable command with notifcation enabled.
  *
  * @param name The name of the resource used to identify the notification.

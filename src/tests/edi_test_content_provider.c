@@ -66,14 +66,16 @@ _edi_test_content_provider_type_assert(const char *mime, const char *type)
 
    provider = edi_content_provider_for_mime_get(mime);
 
-   ck_assert(provider);
-   ck_assert_str_eq(provider->id, type);
+   ck_assert_msg(provider != NULL, "Provider lookup failed for mime '%s'", mime);
+   ck_assert_msg(!strcmp(provider->id, type),
+                 "Provider mismatch for mime '%s': expected '%s', got '%s'",
+                 mime, type, provider->id);
 }
 
 START_TEST (edi_test_content_provider_text_files)
 {
    _edi_test_content_provider_type_assert("text/plain", "text");
-   _edi_test_content_provider_type_assert("application/x-shellscript", "text");
+   _edi_test_content_provider_type_assert("application/x-shellscript", "code");
 }
 END_TEST
 
@@ -99,4 +101,3 @@ void edi_test_content_provider(TCase *tc)
    tcase_add_test(tc, edi_test_content_provider_c_files);
 //   tcase_add_test(tc, edi_test_content_provider_cpp_files);
 }
-

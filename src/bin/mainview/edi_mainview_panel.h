@@ -274,6 +274,15 @@ void edi_mainview_panel_copy(Edi_Mainview_Panel *panel);
 void edi_mainview_panel_paste(Edi_Mainview_Panel *panel);
 
 /**
+ * Select all content in the current view.
+ *
+ * @param panel the mainview panel context
+ *
+ * @ingroup Content
+ */
+void edi_mainview_panel_select_all(Edi_Mainview_Panel *panel);
+
+/**
  * Search the current view's contents.
  *
  * @param panel the mainview panel context

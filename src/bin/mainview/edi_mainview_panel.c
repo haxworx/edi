@@ -891,7 +891,7 @@ edi_mainview_panel_save(Edi_Mainview_Panel *panel)
      return;
 
    editor = (Edi_Editor *)evas_object_data_get(panel->current->view, "editor");
-   if (!editor)
+   if (!editor || !editor->entry)
      return;
 
    edi_editor_save(editor);
@@ -1012,6 +1012,40 @@ edi_mainview_panel_paste(Edi_Mainview_Panel *panel)
 
    if (editor)
      elm_code_widget_selection_paste(editor->entry);
+}
+
+void
+edi_mainview_panel_select_all(Edi_Mainview_Panel *panel)
+{
+   Edi_Editor *editor;
+   Elm_Code *code;
+   Elm_Code_Line *line;
+   unsigned int row, length;
+
+   if (!panel || !panel->current)
+     return;
+
+   editor = (Edi_Editor *)evas_object_data_get(panel->current->view, "editor");
+   if (!editor)
+     return;
+
+   code = elm_code_widget_code_get(editor->entry);
+   if (!code)
+     return;
+
+   row = elm_code_file_lines_get(code->file);
+   if (row <= 0)
+     return;
+
+   line = elm_code_file_line_get(code->file, row);
+   if (!line)
+     return;
+
+   length = elm_code_widget_line_text_column_width_get(editor->entry, line) + 1;
+
+   elm_code_widget_selection_start(editor->entry, 1, 1);
+   elm_code_widget_selection_end(editor->entry, row, length);
+   elm_object_focus_set(editor->entry, EINA_TRUE);
 }
 
 void

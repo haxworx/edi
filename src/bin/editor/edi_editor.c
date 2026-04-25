@@ -927,6 +927,18 @@ _smart_cb_key_down(void *data EINA_UNUSED, Evas *e EINA_UNUSED,
           {
              edi_mainview_goto_popup_show();
           }
+        else if (!strcmp(ev->key, "a"))
+          {
+             edi_mainview_select_all();
+          }
+        else if (!strcmp(ev->key, "n"))
+          {
+             edi_mainview_item_next();
+          }
+        else if (!strcmp(ev->key, "p"))
+          {
+             edi_mainview_item_prev();
+          }
         else if (!strcmp(ev->key, "Insert"))
           {
              edi_mainview_copy();

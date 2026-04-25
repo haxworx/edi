@@ -24,8 +24,16 @@ static Elm_Object_Item *_edi_settings_display, *_edi_settings_builds,
                        *_edi_settings_ai;
 static Ecore_Event_Handler *_edi_settings_config_handler;
 static Evas_Object *_edi_settings_font_preview_code;
-static Evas_Object *_edi_settings_agent_model_combobox;
-static Edi_Agent_Models_Request *_edi_settings_agent_models_request;
+
+typedef struct
+{
+   Evas_Object *model_combobox;
+   Edi_Agent_Models_Request *models_request;
+   Edi_Agent_Request *test_request;
+   Evas_Object *test_button;
+} Edi_Settings_Ai_State;
+
+static Edi_Settings_Ai_State _edi_settings_ai_state = {0};
 
 static void _edi_settings_toolbar_single_select(Evas_Object *tb, Elm_Object_Item *selected);
 
@@ -69,6 +77,9 @@ _edi_settings_project_agent_model_items_clear(Evas_Object *combobox)
    if (!combobox)
      return;
 
+   /* Drop list items first so text callbacks cannot read freed model strings. */
+   elm_genlist_clear(combobox);
+
    old_models = evas_object_data_get(combobox, "agent_model_items");
    old_count = (unsigned int)(uintptr_t)evas_object_data_get(combobox, "agent_model_items_count");
    if (old_models)
@@ -84,20 +95,26 @@ _edi_settings_project_agent_model_items_clear(Evas_Object *combobox)
 static void
 _edi_settings_exit(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
+   _edi_settings_win = NULL;
+   _edi_settings_display = NULL;
+   _edi_settings_builds = NULL;
+   _edi_settings_behaviour = NULL;
+   _edi_settings_project = NULL;
+   _edi_settings_ai = NULL;
+   _edi_settings_ai_state.test_button = NULL;
+
    if (_edi_settings_config_handler)
      {
         ecore_event_handler_del(_edi_settings_config_handler);
         _edi_settings_config_handler = NULL;
      }
-   if (_edi_settings_agent_models_request)
-     {
-        edi_agent_provider_models_fetch_cancel(_edi_settings_agent_models_request);
-        _edi_settings_agent_models_request = NULL;
-     }
-   _edi_settings_project_agent_model_items_clear(_edi_settings_agent_model_combobox);
-   _edi_settings_agent_model_combobox = NULL;
+   /* Do not force-cancel in-flight URL requests during close; their callbacks
+    * are already guarded by _edi_settings_win and can complete safely. */
+   _edi_settings_ai_state.models_request = NULL;
+   _edi_settings_ai_state.test_request = NULL;
+   _edi_settings_project_agent_model_items_clear(_edi_settings_ai_state.model_combobox);
+   _edi_settings_ai_state.model_combobox = NULL;
    _edi_settings_font_preview_code = NULL;
-   _edi_settings_win = NULL;
 
    evas_object_del(data);
 }
@@ -360,7 +377,16 @@ _edi_settings_display_theme_text_get_cb(void *data, Evas_Object *obj EINA_UNUSED
 
    current = data;
 
-   return strdup(current->title);
+   if (!current)
+     return strdup(_("Unknown Theme"));
+
+   if (current->title && current->title[0])
+     return strdup(current->title);
+
+   if (current->name && current->name[0])
+     return strdup(current->name);
+
+   return strdup(_("Unknown Theme"));
 }
 
 static Evas_Object *
@@ -422,10 +448,16 @@ _edi_settings_display_create(Evas_Object *parent)
    evas_object_smart_callback_add(combobox, "item,pressed",
                                  _edi_settings_display_theme_pressed_cb, NULL);
 
-   if (!_edi_project_config->gui.theme)
-     elm_object_text_set(combobox, edi_theme_theme_by_name("default")->title);
-   else
-     elm_object_text_set(combobox, edi_theme_theme_by_name(_edi_project_config->gui.theme)->title);
+   {
+      Edi_Theme *active_theme;
+
+      active_theme = edi_theme_theme_by_name(_edi_project_config->gui.theme);
+      if (!active_theme)
+        active_theme = edi_theme_theme_by_name("default");
+
+      elm_object_text_set(combobox, (active_theme && active_theme->title) ?
+                                    active_theme->title : _("Default EFL"));
+   }
 
    elm_table_pack(table, combobox, 1, 1, 1, 1);
 
@@ -788,14 +820,6 @@ _edi_settings_project_agent_enabled_cb(void *data EINA_UNUSED, Evas_Object *obj,
 }
 
 static void
-_edi_settings_project_agent_edits_enabled_cb(void *data EINA_UNUSED, Evas_Object *obj,
-                                             void *event EINA_UNUSED)
-{
-   _edi_project_config->agent.edits_enabled = elm_check_state_get(obj);
-   _edi_project_config_save();
-}
-
-static void
 _edi_settings_project_agent_model_set(const char *model)
 {
    if (_edi_project_config->agent.model)
@@ -865,8 +889,6 @@ _edi_settings_project_agent_model_combobox_rebuild(Evas_Object *combobox,
    evas_object_data_set(combobox, "agent_model_items", models);
    evas_object_data_set(combobox, "agent_model_items_count", (void *)(uintptr_t)count);
 
-   elm_genlist_clear(combobox);
-
    itc = elm_genlist_item_class_new();
    itc->item_style = "default";
    itc->func.text_get = _edi_settings_project_agent_model_text_get_cb;
@@ -897,9 +919,10 @@ _edi_settings_project_agent_models_loaded_cb(const char *provider_id,
    const char *saved_model;
    const char *active_model;
 
-   _edi_settings_agent_models_request = NULL;
+   _edi_settings_ai_state.models_request = NULL;
 
-   if (!combobox)
+   if (!combobox || !_edi_settings_win ||
+       combobox != _edi_settings_ai_state.model_combobox)
      {
         edi_agent_models_free(models, count);
         return;
@@ -934,11 +957,8 @@ _edi_settings_project_agent_models_refresh(Evas_Object *model_combobox,
    Edi_Agent_Model_List fallback;
    const char *active_model;
 
-   if (_edi_settings_agent_models_request)
-     {
-        edi_agent_provider_models_fetch_cancel(_edi_settings_agent_models_request);
-        _edi_settings_agent_models_request = NULL;
-     }
+   if (!model_combobox)
+     return selected_model ?: "";
 
    fallback = edi_agent_provider_models_get(provider_id);
    active_model = _edi_settings_project_agent_model_combobox_rebuild(model_combobox,
@@ -946,12 +966,15 @@ _edi_settings_project_agent_models_refresh(Evas_Object *model_combobox,
                                                                      selected_model,
                                                                      fallback.models,
                                                                      fallback.count);
+   if (_edi_settings_ai_state.models_request)
+     return active_model;
+
    elm_object_disabled_set(model_combobox, EINA_TRUE);
-   _edi_settings_agent_models_request = edi_agent_provider_models_fetch(_edi_project_config,
+   _edi_settings_ai_state.models_request = edi_agent_provider_models_fetch(_edi_project_config,
                                                                         provider_id,
                                                                         _edi_settings_project_agent_models_loaded_cb,
                                                                         model_combobox);
-   if (!_edi_settings_agent_models_request)
+   if (!_edi_settings_ai_state.models_request)
      elm_object_disabled_set(model_combobox, EINA_FALSE);
 
    return active_model;
@@ -1029,14 +1052,6 @@ _edi_settings_project_agent_timeout_cb(void *data EINA_UNUSED, Evas_Object *obj,
    _edi_project_config_save();
 }
 
-static void
-_edi_settings_project_agent_steps_max_cb(void *data EINA_UNUSED, Evas_Object *obj,
-                                         void *event EINA_UNUSED)
-{
-   _edi_project_config->agent.steps_max = (int) elm_spinner_value_get(obj);
-   _edi_project_config_save();
-}
-
 static char *
 _edi_settings_project_agent_provider_text_get_cb(void *data, Evas_Object *obj EINA_UNUSED,
                                                  const char *part EINA_UNUSED);
@@ -1085,16 +1100,7 @@ _edi_settings_ai_create(Evas_Object *parent)
    evas_object_smart_callback_add(check, "changed",
                                   _edi_settings_project_agent_enabled_cb, NULL);
    evas_object_show(check);
-
-   check = elm_check_add(table);
-   elm_object_text_set(check, _("Enable AI Edits (beta)"));
-   elm_check_state_set(check, _edi_project_config->agent.edits_enabled);
-   evas_object_size_hint_weight_set(check, EVAS_HINT_EXPAND, 0.0);
-   evas_object_size_hint_align_set(check, EVAS_HINT_FILL, 0.5);
-   elm_table_pack(table, check, 1, 0, 1, 1);
-   evas_object_smart_callback_add(check, "changed",
-                                  _edi_settings_project_agent_edits_enabled_cb, NULL);
-   evas_object_show(check);
+   evas_object_data_set(table, "agent_enabled_check", check);
 
    label = elm_label_add(table);
    elm_object_text_set(label, _("Provider"));
@@ -1144,7 +1150,7 @@ _edi_settings_ai_create(Evas_Object *parent)
    evas_object_smart_callback_add(combobox_model, "item,pressed",
                                   _edi_settings_project_agent_model_pressed_cb, NULL);
    elm_table_pack(table, combobox_model, 1, 2, 1, 1);
-   _edi_settings_agent_model_combobox = combobox_model;
+   _edi_settings_ai_state.model_combobox = combobox_model;
 
    saved_model = _edi_project_config->agent.model ?: "";
    active_model = _edi_settings_project_agent_models_refresh(combobox_model,
@@ -1235,35 +1241,15 @@ _edi_settings_ai_create(Evas_Object *parent)
    evas_object_smart_callback_add(spinner, "changed",
                                   _edi_settings_project_agent_timeout_cb, NULL);
 
-   label = elm_label_add(table);
-   elm_object_text_set(label, _("Max AI edit steps"));
-   evas_object_size_hint_weight_set(label, 0.0, 0.0);
-   evas_object_size_hint_align_set(label, 0.0, EVAS_HINT_FILL);
-   elm_table_pack(table, label, 0, 7, 1, 1);
-   evas_object_show(label);
-
-   spinner = elm_spinner_add(table);
-   elm_spinner_min_max_set(spinner, 1.0, 4096.0);
-   elm_spinner_step_set(spinner, 1.0);
-   elm_spinner_editable_set(spinner, EINA_TRUE);
-   elm_spinner_wrap_set(spinner, EINA_FALSE);
-   elm_spinner_value_set(spinner, _edi_project_config->agent.steps_max > 0 ?
-                                  _edi_project_config->agent.steps_max : 256);
-   evas_object_size_hint_weight_set(spinner, EVAS_HINT_EXPAND, 0.0);
-   evas_object_size_hint_align_set(spinner, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_table_pack(table, spinner, 1, 7, 1, 1);
-   evas_object_show(spinner);
-   evas_object_smart_callback_add(spinner, "changed",
-                                  _edi_settings_project_agent_steps_max_cb, NULL);
-
    button = elm_button_add(table);
    elm_object_text_set(button, _("Test Connection"));
    evas_object_size_hint_weight_set(button, EVAS_HINT_EXPAND, 0.0);
    evas_object_size_hint_align_set(button, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_table_pack(table, button, 1, 8, 1, 1);
+   elm_table_pack(table, button, 1, 7, 1, 1);
    evas_object_show(button);
    evas_object_smart_callback_add(button, "clicked",
                                   _edi_settings_project_agent_test_cb, button);
+   _edi_settings_ai_state.test_button = button;
 
    content = elm_box_add(parent);
    elm_box_horizontal_set(content, EINA_FALSE);
@@ -1304,8 +1290,13 @@ _edi_settings_project_agent_test_done_cb(const char *response, const char *error
 {
    Evas_Object *button = data;
 
-   if (button)
+   _edi_settings_ai_state.test_request = NULL;
+
+   if (button && button == _edi_settings_ai_state.test_button && _edi_settings_win)
      elm_object_disabled_set(button, EINA_FALSE);
+
+   if (!_edi_settings_win)
+     return;
 
    if (error && error[0])
      edi_screens_message_icon_with_copy(_edi_settings_win, _("AI Agent Test Failed"), error,
@@ -1331,10 +1322,23 @@ _edi_settings_project_agent_test_cb(void *data, Evas_Object *obj EINA_UNUSED,
         return;
      }
 
-   elm_object_disabled_set(button, EINA_TRUE);
-   if (!edi_agent_request_send(_("Reply with OK only."), _edi_settings_project_agent_test_done_cb, button))
+   if (_edi_settings_ai_state.test_request)
      {
-        elm_object_disabled_set(button, EINA_FALSE);
+        edi_screens_message(_edi_settings_win, _("AI Agent Test Busy"),
+                            _("An AI agent test is already in progress."));
+        return;
+     }
+
+   if (button && button == _edi_settings_ai_state.test_button)
+     elm_object_disabled_set(button, EINA_TRUE);
+
+   _edi_settings_ai_state.test_request =
+      edi_agent_request_send(_("Reply with OK only."),
+                             _edi_settings_project_agent_test_done_cb, button);
+   if (!_edi_settings_ai_state.test_request)
+     {
+        if (button && button == _edi_settings_ai_state.test_button)
+          elm_object_disabled_set(button, EINA_FALSE);
         edi_screens_message(_edi_settings_win, _("AI Agent Test Failed"),
                             _("Unable to start agent request."));
      }
